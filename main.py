@@ -17,6 +17,20 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 from collections import defaultdict, OrderedDict
 
+# Import database configuration
+try:
+    from config import DB_CONFIG
+except ImportError:
+    # Fallback configuration if config.py doesn't exist
+    DB_CONFIG = {
+        'host': 'localhost',
+        'port': 3306,
+        'user': 'root',
+        'password': '',
+        'database': 'track_serve',
+        'charset': 'utf8mb4',
+        'cursorclass': 'DictCursor'
+    }
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Required for flash messages
@@ -34,18 +48,30 @@ otp_storage = {}
 
 # Function to connect to MySQL
 def get_db_connection():
+    """
+    Establishes a connection to the MySQL database using configuration from config.py
+    Returns: pymysql connection object or None if connection fails
+    """
     try:
-        connection = pymysql.connect(
-            host='localhost',
-            port=3306,
-            user='root',
-            password='',
-            db='track_serve',
-            cursorclass=pymysql.cursors.DictCursor
-        )
+        # Prepare connection parameters
+        connection_params = {
+            'host': DB_CONFIG['host'],
+            'port': DB_CONFIG['port'],
+            'user': DB_CONFIG['user'],
+            'password': DB_CONFIG['password'],
+            'database': DB_CONFIG['database'],
+            'charset': DB_CONFIG.get('charset', 'utf8mb4'),
+            'cursorclass': DictCursor
+        }
+        
+        connection = pymysql.connect(**connection_params)
         return connection
     except pymysql.MySQLError as e:
         print(f"Error connecting to MySQL: {e}")
+        print(f"Attempted connection to: {DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error during database connection: {e}")
         return None
 
 # Function to send OTP via Twilio
@@ -1546,87 +1572,109 @@ def generate_pdf(data_list, date):
 
 @app.route("/g_v_list", methods=["GET", "POST"])
 def g_v_list():
-    if request.method == "GET":
-        meal_type = request.args.get("meal_type")
-        menu_items = []
-        if meal_type in ["breakfast", "lunch", "dinner"]:
-            try:
-                conn = get_db_connection()
-                cursor = conn.cursor()
-                today = datetime.now().date()
-                weekday = today.strftime('%A')  # e.g., 'Monday'
-                print(weekday)
+    if request.method == "POST":
+        # POST processing
+        meal_type = request.form.get("meal_type")
+        persons = request.form.get("person")
+        menu_items = request.form.getlist("menu_item[]")
+        groceries = request.form.getlist("grocery[]")
+        vegetables = request.form.getlist("vegetable[]")
+        khanabchas = request.form.getlist("khanabcha[]")
+        khanaghatas = request.form.getlist("khanaghata[]")
+        remarks = request.form.getlist("remark[]")
 
-                query = f"""
-                    SELECT `{weekday}` AS day_value
-                    FROM `{meal_type}`
-                    WHERE `{weekday}` IS NOT NULL AND `{weekday}` != ''
-                    AND from_date <= %s AND to_date >= %s
-                """
+        def format_readable_list(data_list):
+            return "\n".join([f"{i+1}. {item.strip()}" for i, item in enumerate(data_list) if item.strip()])
 
-                cursor.execute(query, (today, today))
-                results = cursor.fetchall()
-                print(results)
+        try:
+            conn = get_db_connection()
+            if not conn:
+                flash("Database connection failed!", "danger")
+                return redirect("/g_v_list")
+                
+            cursor = conn.cursor()
 
-                for row in results:
-                    if row['day_value']:
-                        items = row['day_value'].split('\n')
-                        menu_items.extend([item.strip() for item in items if item.strip()])
+            # Insert each menu item as a separate row
+            inserted_count = 0
+            for i in range(len(menu_items)):
+                menu_item = menu_items[i].strip() if i < len(menu_items) else ""
+                if menu_item:  # Only insert if menu item is not empty
+                    try:
+                        cursor.execute("""
+                            INSERT INTO grocery_vegetable_management
+                            (date_day, meal_type, menu_item, person, grocery, vegetable, khanabcha, khanaghata, remark)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (
+                            datetime.now(),
+                            meal_type,
+                            menu_item,
+                            persons,
+                            groceries[i].strip() if i < len(groceries) else "",
+                            vegetables[i].strip() if i < len(vegetables) else "",
+                            khanabchas[i].strip() if i < len(khanabchas) else "",
+                            khanaghatas[i].strip() if i < len(khanaghatas) else "",
+                            remarks[i].strip() if i < len(remarks) else ""
+                        ))
+                        inserted_count += 1
+                    except Exception as e:
+                        print(f"Error inserting row {i}: {e}")
 
-                cursor.close()
-                conn.close()
+            if inserted_count > 0:
+                conn.commit()
+                flash(f"Successfully saved {inserted_count} item(s)!", "success")
+            else:
+                flash("No data to save. Please fill in the form.", "warning")
+            
+            cursor.close()
+            conn.close()
+        except pymysql.MySQLError as e:
+            flash(f"Database error: {str(e)}", "danger")
+            print(f"Database error while inserting: {str(e)}")
+        except Exception as e:
+            flash(f"Unexpected error: {str(e)}", "danger")
+            print(f"Unexpected error: {str(e)}")
 
-            except pymysql.MySQLError as e:
-                return f"Database error while fetching: {str(e)}", 500
+        return redirect("/g_v_list?meal_type=" + (meal_type or ""))
+    
+    # GET processing
+    meal_type = request.args.get("meal_type")
+    menu_items = []
+    if meal_type in ["breakfast", "lunch", "dinner"]:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            today = datetime.now().date()
+            weekday = today.strftime('%A')  # e.g., 'Monday'
 
-        return render_template("g_v_list.html", meal_type=meal_type, menu_items=menu_items)
+            query = f"""
+                SELECT `{weekday}` AS day_value
+                FROM `{meal_type}`
+                WHERE `{weekday}` IS NOT NULL AND `{weekday}` != ''
+                AND from_date <= %s AND to_date >= %s
+            """
 
-     # POST processing
-    meal_type = request.form.get("meal_type")
-    persons = request.form.get("person")
-    menu_items = request.form.getlist("menu_item[]")
-    groceries = request.form.getlist("grocery[]")
-    vegetables = request.form.getlist("vegetable[]")
-    khanabchas = request.form.getlist("khanabcha[]")
-    khanaghatas = request.form.getlist("khanaghata[]")
-    remarks = request.form.getlist("remark[]")
+            cursor.execute(query, (today, today))
+            results = cursor.fetchall()
 
-    def format_readable_list(data_list):
-        return "\n".join([f"{i+1}. {item.strip()}" for i, item in enumerate(data_list) if item.strip()])
+            for row in results:
+                if row['day_value']:
+                    items = row['day_value'].split('\n')
+                    menu_items.extend([item.strip() for item in items if item.strip()])
 
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+            cursor.close()
+            conn.close()
 
-        cursor.execute("""
-            INSERT INTO grocery_vegetable_management
-            (date_day, meal_type, menu_item, person, grocery, vegetable, khanabcha, khanaghata, remark)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            datetime.now(),
-            meal_type,
-            format_readable_list(menu_items),
-            persons,
-            format_readable_list(groceries),
-            format_readable_list(vegetables),
-            format_readable_list(khanabchas),
-            format_readable_list(khanaghatas),
-            format_readable_list(remarks)
-        ))
+        except pymysql.MySQLError as e:
+            flash(f"Database error while fetching: {str(e)}", "danger")
+            return render_template("g_v_list.html", meal_type=meal_type, menu_items=[])
 
-        conn.commit()
-        cursor.close()
-        conn.close()
-    except pymysql.MySQLError as e:
-        return f"Database error while inserting: {str(e)}", 500
-
-    return redirect("/g_v_list")
+    return render_template("g_v_list.html", meal_type=meal_type, menu_items=menu_items)
 
 @app.route("/g_v_report")
 def g_v_report():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM grocery_vegetable_management")
+    cursor.execute("SELECT * FROM grocery_vegetable_management ORDER BY date_day DESC, id DESC")
     rows = cursor.fetchall()
     conn.close()
 
@@ -1637,6 +1685,7 @@ def g_v_report():
         meal_type = row['meal_type']
         key = (date, meal_type)
         grouped_data[key].append({
+            'id': row['id'],  # Add id for deletion
             'menu_item': row['menu_item'],
             'person': row['person'],
             'grocery': row['grocery'],
@@ -1656,21 +1705,24 @@ def g_v_report():
 
 @app.route("/delete_gv_row", methods=["POST"])
 def delete_gv_row():
-    date = request.form.get("date")
-    meal_type = request.form.get("meal_type")
-    menu_item = request.form.get("menu_item")
+    row_id = request.form.get("id")
+    
+    if not row_id:
+        flash("Error: No ID provided for deletion", "danger")
+        return redirect(url_for("g_v_report"))
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        table_name = "grocery_vegetable_management"
-        query = f"DELETE FROM `{table_name}` WHERE menu_item LIKE %s LIMIT 1"
-        cursor.execute(query, (f"%{menu_item}%",))
+        query = "DELETE FROM grocery_vegetable_management WHERE id = %s"
+        cursor.execute(query, (row_id,))
         conn.commit()
         cursor.close()
         conn.close()
+        flash("Row deleted successfully!", "success")
     except Exception as e:
-        print("Deletion error:", e)
+        flash(f"Error deleting row: {str(e)}", "danger")
+        print(f"Deletion error: {e}")
     
     return redirect(url_for("g_v_report"))
 

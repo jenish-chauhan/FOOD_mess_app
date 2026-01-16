@@ -100,6 +100,17 @@
 
   <h2 class="text-center">🥗 Grocery & Vegetable Management</h2>
 
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
   <form action="/g_v_list" method="post">
   <div class="text-center">
     <label for="meal_selector" class="form-label fw-bold">Select Meal Type:</label>
@@ -131,23 +142,39 @@
         </tr>
       </thead>
       <tbody id="meal_table">
-        {% for item in menu_items %}
-        <tr>
-          <td>{{ meal_type.capitalize() }}</td>
-          <td><textarea name="menu_item[]" readonly>{{ item }}</textarea></td>
-          <td><textarea name="grocery[]"></textarea></td>
-          <td><textarea name="vegetable[]"></textarea></td>
-          <td><textarea name="khanabcha[]"></textarea></td>
-          <td><textarea name="khanaghata[]"></textarea></td>
-          <td><textarea name="remark[]"></textarea></td>
-        </tr>
-        {% endfor %}
+        {% if menu_items %}
+          {% for item in menu_items %}
+          <tr>
+            <td>{{ meal_type.capitalize() if meal_type else '' }}</td>
+            <td><textarea name="menu_item[]" readonly>{{ item }}</textarea></td>
+            <td><textarea name="grocery[]" placeholder="Enter grocery items"></textarea></td>
+            <td><textarea name="vegetable[]" placeholder="Enter vegetables"></textarea></td>
+            <td><textarea name="khanabcha[]" placeholder="Enter khana bacha"></textarea></td>
+            <td><textarea name="khanaghata[]" placeholder="Enter khana ghata"></textarea></td>
+            <td><textarea name="remark[]" placeholder="Enter remarks"></textarea></td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" class="text-center text-muted">
+              {% if meal_type %}
+                No menu items found for {{ meal_type }} today. Please select a meal type or check if menu is set for today.
+              {% else %}
+                Please select a meal type to load menu items.
+              {% endif %}
+            </td>
+          </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>
 
   <div class="text-center">
-    <button type="submit" class="btn btn-submit btn-custom">✅ Submit</button>
+    {% if menu_items %}
+      <button type="submit" class="btn btn-submit btn-custom">✅ Submit</button>
+    {% else %}
+      <button type="submit" class="btn btn-submit btn-custom" disabled>✅ Submit (No items to submit)</button>
+    {% endif %}
   </div>
 </form>
 
