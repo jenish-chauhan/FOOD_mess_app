@@ -25,8 +25,8 @@ except ImportError:
     DB_CONFIG = {
         'host': 'localhost',
         'port': 3306,
-        'user': 'root',
-        'password': '',
+        'user': 'trackserve',
+        'password': 'StrongPassword123',
         'database': 'track_serve',
         'charset': 'utf8mb4',
         'cursorclass': 'DictCursor'

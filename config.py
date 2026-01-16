@@ -1,14 +1,14 @@
 """
 Database Configuration for Track & Serve Application
-This file contains database connection settings for local XAMPP MySQL development.
+This file contains database connection settings for cloud deployment.
 """
 
 # Database Configuration
 DB_CONFIG = {
     'host': 'localhost',
     'port': 3306,
-    'user': 'root',
-    'password': '',  # Default XAMPP MySQL password (empty)
+    'user': 'trackserve',
+    'password': 'StrongPassword123',
     'database': 'track_serve',
     'charset': 'utf8mb4',
     'cursorclass': 'DictCursor'  # Will be converted to actual class in main.py

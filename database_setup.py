@@ -1,13 +1,13 @@
 """
 Database Setup Script for Track & Serve Application
-This script helps set up the MySQL database for local development.
+This script helps set up the MySQL database.
 
 Usage:
     python database_setup.py
 
 Prerequisites:
-    - XAMPP MySQL server running on localhost:3306
-    - MySQL root user with empty password (default XAMPP setup)
+    - MySQL server running
+    - Database user with appropriate permissions
     - PyMySQL installed (pip install pymysql)
 """
 
@@ -15,14 +15,18 @@ import pymysql
 import sys
 import os
 
-# Database configuration (matches config.py)
-DB_CONFIG = {
-    'host': 'localhost',
-    'port': 3306,
-    'user': 'root',
-    'password': '',  # Default XAMPP MySQL password
-    'database': 'track_serve'
-}
+# Import database configuration from config.py
+try:
+    from config import DB_CONFIG
+except ImportError:
+    # Fallback configuration if config.py doesn't exist
+    DB_CONFIG = {
+        'host': 'localhost',
+        'port': 3306,
+        'user': 'trackserve',
+        'password': 'StrongPassword123',
+        'database': 'track_serve'
+    }
 
 def create_database():
     """Create the track_serve database if it doesn't exist"""
