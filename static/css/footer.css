@@ -1,0 +1,56 @@
+/* Basic Footer Styles */
+footer {
+    background-color: rgba(0, 0, 0, 0.52); /* Adjusted opacity */
+    color: white;
+    position: fixed; /* Fixed to stay at the bottom */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 15px;
+}
+
+/* Footer Links */
+footer a {
+    color: #f8b400;
+    text-decoration: none;
+    margin: 0 5px; /* Adjusted margin */
+    transition: color 0.3s ease-in-out;
+    display: inline-block;
+}
+
+footer a:hover {
+    color: #ffffff;
+}
+
+footer .container {
+    padding: 0;
+}
+
+footer p {
+    margin: 0;
+    font-size: clamp(0.75rem, 2vw, 1rem);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    footer {
+        padding: 12px 10px;
+        font-size: clamp(0.7rem, 1.8vw, 0.875rem);
+    }
+
+    footer a {
+        margin: 0 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    footer {
+        padding: 10px 8px;
+        font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+    }
+
+    footer a {
+        margin: 0 2px;
+    }
+}

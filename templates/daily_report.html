@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Report</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    h2, h3, h4 {
+      font-weight: bold;
+    }
+    .form-inline-custom {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    .download-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    table {
+      background-color: #ffffff;
+    }
+    .section-header {
+      background-color: #e9ecef;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .meal-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .meal-name {
+      color: #6c757d;
+      font-weight: 600;
+    }
+    .btn {
+      margin: 20px 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn.download-btn {
+      background-color: #28a745;
+    }
+    .btn.download-btn:hover {
+      background-color: #218838;
+    }
+    .btn.back-btn {
+      background-color: #6c757d;
+      text-decoration: none;
+    }
+    .btn.back-btn:hover {
+      background-color: #5a6268;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .total-summary {
+      font-size: 1.2rem;
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #e2e6ea;
+      border-left: 6px solid #0d6efd;
+      border-radius: 5px;
+      font-weight: 600;
+      color: #0d6efd;
+    }
+    .count-badge {
+      font-size: 1rem;
+      padding: 6px 12px;
+    }
+    .search-box {
+      max-width: 500px;
+      margin: 0 auto 20px auto;
+    }
+  </style>
+</head>
+<body class="container py-4">
+
+  <h2 class="text-center text-primary mb-4">📊 Daily Report</h2>
+
+  <form method="post" class="form-inline-custom mb-4">
+    <label for="date" class="fw-semibold">Select Date:</label>
+    <input type="date" id="date" name="date" class="form-control w-auto" value="{{ date_input }}" required>
+    <button type="submit" class="btn btn-primary fw-semibold">Fetch Data</button>
+  </form>
+
+  <!-- ✅ Search Box Always Visible -->
+  <div class="search-box">
+    <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search by student ID or anything..." onkeyup="filterTables()" />
+  </div>
+
+  {% if date_input %}
+    <h3 class="text-center mb-4">📅 Report for <span class="text-success">{{ date_input }}</span></h3>
+
+    <div class="download-buttons mb-4">
+      <a href="{{ url_for('download_report', file_type='pdf', date_input=date_input) }}" class="btn btn-danger fw-semibold">
+        📄 Download PDF
+      </a>
+      <a href="{{ url_for('download_report', file_type='excel', date_input=date_input) }}" class="btn btn-success fw-semibold">
+        📊 Download Excel
+      </a>
+    </div>
+
+    {% for category, meals in data.items() %}
+      <div class="section-header mb-3">
+        <h4 class="text-primary mb-0">{{ category.replace("_", " ") | capitalize }}</h4>
+      </div>
+
+      {% for meal, records in meals.items() %}
+        <div class="meal-header-row">
+          <h5 class="meal-name">{{ meal | capitalize }}</h5>
+          <span class="badge bg-success count-badge">Total: {{ records | length }}</span>
+        </div>
+
+        {% if records %}
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover text-center searchable-table">
+              <thead class="table-dark">
+                <tr>
+                  <th>S.No</th>
+                  <th>
+                    {% if "faculty" in category %}
+                      Faculty ID
+                    {% else %}
+                      Student ID
+                    {% endif %}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in records %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ row.get("student_id", "N/A") }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted">No data available for {{ meal }}.</p>
+        {% endif %}
+      {% endfor %}
+
+      <div class="total-summary">
+        🧮 Grand Total for {{ category.replace("_", " ") | capitalize }}: {{ category_totals[category] }}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-center text-muted">Please select a date to view the report.</p>
+  {% endif %}
+
+  <div class="button-container">
+    <a href="/admin_dashboard" class="btn back-btn">⬅ Back to Dashboard</a>
+  </div>
+
+  <!-- ✅ JavaScript Filter Logic -->
+  <script>
+    function filterTables() {
+      const input = document.getElementById("searchInput").value.toLowerCase();
+      const tables = document.querySelectorAll(".searchable-table");
+
+      tables.forEach(table => {
+        const rows = table.querySelectorAll("tbody tr");
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = text.includes(input) ? "" : "none";
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>

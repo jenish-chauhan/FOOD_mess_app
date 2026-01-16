@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Entry</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+  body {
+    background: url("{{ url_for('static', filename='images/main_image.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .form-container {
+    max-width: 600px;
+    margin: auto;
+    background-color: rgba(255, 255, 255, 0.95); /* slightly transparent white */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .form-title {
+    color: #00796b;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .btn-primary {
+    background-color: #00796b;
+    border-color: #00796b;
+  }
+
+  .btn-primary:hover {
+    background-color: #004d40;
+  }
+
+  .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #3b82f6;
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn.back-btn {
+            background: #6b7280;
+        }
+
+        .btn.back-btn:hover {
+            background: #4b5563;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+</style>
+
+  <script>
+    function toggleFields() {
+      const userType = document.getElementById("user_type").value;
+      document.getElementById("hostel_fields").style.display = "none";
+      document.getElementById("amount_group").style.display = "none";
+
+      if (userType === "Hostel Student") {
+        document.getElementById("user_id_label").innerText = "Student ID";
+        document.getElementById("hostel_fields").style.display = "block";
+      } else if (userType === "Non Hostel Student") {
+        document.getElementById("user_id_label").innerText = "Student ID";
+        document.getElementById("amount_group").style.display = "block";
+      } else if (userType === "Faculty") {
+        document.getElementById("user_id_label").innerText = "Faculty ID";
+        document.getElementById("amount_group").style.display = "block";
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container py-5">
+    <div class="form-container">
+      <h2 class="form-title">Payment Entry Form</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="mb-3">
+          <label for="user_type" class="form-label">User Type</label>
+          <select class="form-select" name="user_type" id="user_type" onchange="toggleFields()" required>
+            <option value="" selected disabled>Choose...</option>
+            <option value="Hostel Student">Hostel Student</option>
+            <option value="Non Hostel Student">Non Hostel Student</option>
+            <option value="Faculty">Faculty</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="user_id" class="form-label" id="user_id_label">Student ID</label>
+          <input type="text" class="form-control" name="user_id" id="user_id" required>
+        </div>
+
+        <!-- Hostel specific section -->
+        <div id="hostel_fields" style="display: none;">
+          <div class="mb-3">
+            <label for="term_type" class="form-label">Select Term</label>
+            <select class="form-select" name="term_type" id="term_type">
+              <option value="First Term">First Term (Jul–Dec)</option>
+              <option value="Second Term">Second Term (Jan–Jun)</option>
+              <option value="Full Year">Full Year (Both Terms)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Amount field for non-hostel student or faculty -->
+        <div class="mb-3" id="amount_group" style="display: none;">
+          <label for="amount" class="form-label">Amount</label>
+          <input type="number" class="form-control" name="amount" id="amount" step="1" min="0">
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary px-5">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="w-full text-center mb-4">
+            <a href="/admin_dashboard" class="btn back-btn"><i class="fas fa-arrow-left"></i>⬅ Back to Dashboard</a>
+        </div>
+    </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

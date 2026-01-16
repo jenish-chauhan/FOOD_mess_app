@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+
+</head>
+<body>
+
+    
+    <form class="form" method="POST">
+        <p class="form-title">User</p>
+
+        <label for="options">Choose an option:<yj/label>
+        <select id="options" name="options">
+        <option value="hosteller">Hosteller</option>
+        <option value="non_hosteller">Non-Hosteller</option>
+        <option value="faculty">Faculty</option>
+        </select>
+
+        <!-- Submit button -->
+        <button type="submit" class="submit" onclick="location.href='{{ url_for('user') }}'">submit</button>
+        <a href="#menu" class="submit" onclick="location.href='{{ url_for('home') }}'">Home</a>
+    </form>
+</body>
+
+
+</html>

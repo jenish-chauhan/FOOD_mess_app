@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grocery & Vegetable Management</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #f4f6f8;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+
+    form {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 95%;
+      margin: auto;
+    }
+
+    .form-select {
+      max-width: 250px;
+      margin-bottom: 20px;
+    }
+
+    table th {
+      background-color: #007BFF;
+      color: white;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    table td {
+      text-align: center;
+      vertical-align: middle;
+      padding: 10px;
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+      resize: vertical;
+    }
+
+    textarea:focus,
+    input[type="text"]:focus,
+    .form-select:focus {
+      border-color: #007BFF;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+      outline: none;
+    }
+
+    .btn-custom {
+      padding: 10px 25px;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit {
+      background-color: #28a745;
+      color: white;
+      border: none;
+    }
+
+    .btn-submit:hover {
+      background-color: #218838;
+    }
+
+    .btn.back-btn {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .btn.back-btn:hover {
+      background-color: #5a6268;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table tr:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body class="py-4">
+
+  <h2 class="text-center">🥗 Grocery & Vegetable Management</h2>
+
+  <form action="/g_v_list" method="post">
+  <div class="text-center">
+    <label for="meal_selector" class="form-label fw-bold">Select Meal Type:</label>
+    <select name="meal_type" id="meal_selector" class="form-select d-inline-block" onchange="loadMealData()" required>
+      <option value="">-- Choose Meal --</option>
+      <option value="breakfast" {% if meal_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
+      <option value="lunch" {% if meal_type == 'lunch' %}selected{% endif %}>Lunch</option>
+      <option value="dinner" {% if meal_type == 'dinner' %}selected{% endif %}>Dinner</option>
+    </select>
+  </div>
+
+  <!-- Person input field (appears only once) -->
+  <div class="text-center mt-3">
+    <label for="person" class="form-label fw-bold">Number of Persons:</label>
+    <input type="text" name="person" id="person" class="form-control d-inline-block" style="max-width: 200px;" required />
+  </div>
+
+  <div class="table-wrapper mt-4">
+    <table class="table table-bordered table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Meal Name</th>
+          <th>Menu Item</th>
+          <th>Grocery</th>
+          <th>Vegetable</th>
+          <th>Khana Bacha</th>
+          <th>Khana Ghata</th>
+          <th>Remark</th>
+        </tr>
+      </thead>
+      <tbody id="meal_table">
+        {% for item in menu_items %}
+        <tr>
+          <td>{{ meal_type.capitalize() }}</td>
+          <td><textarea name="menu_item[]" readonly>{{ item }}</textarea></td>
+          <td><textarea name="grocery[]"></textarea></td>
+          <td><textarea name="vegetable[]"></textarea></td>
+          <td><textarea name="khanabcha[]"></textarea></td>
+          <td><textarea name="khanaghata[]"></textarea></td>
+          <td><textarea name="remark[]"></textarea></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center">
+    <button type="submit" class="btn btn-submit btn-custom">✅ Submit</button>
+  </div>
+</form>
+
+
+  <div class="text-center mt-3">
+    <a href="/admin_dashboard" class="btn btn-custom back-btn">⬅ Back to Dashboard</a>
+  </div>
+
+  <script>
+    function loadMealData() {
+      const selectedMeal = document.getElementById("meal_selector").value;
+      if (selectedMeal) {
+        window.location.href = `/g_v_list?meal_type=${selectedMeal}`;
+      }
+    }
+  </script>
+
+</body>
+</html>

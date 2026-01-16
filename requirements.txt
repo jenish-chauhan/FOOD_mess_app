@@ -1,0 +1,8 @@
+Flask
+pymysql
+twilio
+mysql-connector-python
+qrcode
+pandas
+fpdf
+reportlab

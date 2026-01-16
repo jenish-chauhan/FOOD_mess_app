@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Meal Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f3f4f6;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        body.collapsed {
+            margin-left: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .date-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .date-inputs label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .date-inputs input {
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 200px;
+            transition: border-color 0.3s ease;
+        }
+
+        .date-inputs input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .meal-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .meal-title {
+            flex: 0 0 120px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            text-align: left;
+            padding-top: 1.5rem;
+        }
+
+        .meal-row .col {
+            flex: 1;
+            padding: 0 0.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .day-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            background: #1f2937;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .desc-box {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.3s ease;
+        }
+
+        .desc-box:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #3b82f6;
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn.back-btn {
+            background: #6b7280;
+        }
+
+        .btn.back-btn:hover {
+            background: #4b5563;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                margin-left: 80px;
+                padding: 1rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .date-inputs input {
+                width: 160px;
+            }
+
+            .meal-title {
+                flex: 0 0 100px;
+                font-size: 1rem;
+            }
+
+            .desc-box {
+                font-size: 0.75rem;
+                min-height: 60px;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .meal-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .meal-title {
+                text-align: center;
+                margin-bottom: 0.5rem;
+                padding-top: 0;
+            }
+
+            .meal-row .col {
+                padding: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-utensils"></i> Weekly Meal Menu</h2>
+        <div class="date-inputs">
+            <div class="flex flex-col">
+                <label for="fromDate">From Date:</label>
+                <input type="date" id="fromDate" name="fromDate" required>
+            </div>
+            <div class="flex flex-col">
+                <label for="toDate">To Date:</label>
+                <input type="date" id="toDate" name="toDate" required>
+            </div>
+        </div>
+
+        <!-- Breakfast Form -->
+        <div class="card">
+            <form action="/submit" method="post" onsubmit="return validateForm()">
+                <input type="hidden" name="meal_type" value="breakfast">
+                <input type="hidden" name="fromDate" id="hiddenFromDateBreakfast">
+                <input type="hidden" name="toDate" id="hiddenToDateBreakfast">
+                <div class="meal-row">
+                    <div class="meal-title"><i class="fas fa-coffee"></i> Breakfast</div>
+                    <div class="col">
+                        <div class="day-label">Monday</div>
+                        <textarea class="desc-box" name="Monday" placeholder="Enter breakfast items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Tuesday</div>
+                        <textarea class="desc-box" name="Tuesday" placeholder="Enter breakfast items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Wednesday</div>
+                        <textarea class="desc-box" name="Wednesday" placeholder="Enter breakfast items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Thursday</div>
+                        <textarea class="desc-box" name="Thursday" placeholder="Enter breakfast items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Friday</div>
+                        <textarea class="desc-box" name="Friday" placeholder="Enter breakfast items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Saturday</div>
+                        <textarea class="desc-box" name="Saturday" placeholder="Enter breakfast items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Sunday</div>
+                        <textarea class="desc-box" name="Sunday" placeholder="Enter breakfast items..."></textarea>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="btn"><i class="fas fa-check"></i> Submit Breakfast</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lunch Form -->
+        <div class="card">
+            <form action="/submit" method="post" onsubmit="return validateForm()">
+                <input type="hidden" name="meal_type" value="lunch">
+                <input type="hidden" name="fromDate" id="hiddenFromDateLunch">
+                <input type="hidden" name="toDate" id="hiddenToDateLunch">
+                <div class="meal-row">
+                    <div class="meal-title"><i class="fas fa-utensils"></i> Lunch</div>
+                    <div class="col">
+                        <div class="day-label">Monday</div>
+                        <textarea class="desc-box" name="Monday" placeholder="Enter lunch items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Tuesday</div>
+                        <textarea class="desc-box" name="Tuesday" placeholder="Enter lunch items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Wednesday</div>
+                        <textarea class="desc-box" name="Wednesday" placeholder="Enter lunch items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Thursday</div>
+                        <textarea class="desc-box" name="Thursday" placeholder="Enter lunch items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Friday</div>
+                        <textarea class="desc-box" name="Friday" placeholder="Enter lunch items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Saturday</div>
+                        <textarea class="desc-box" name="Saturday" placeholder="Enter lunch items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Sunday</div>
+                        <textarea class="desc-box" name="Sunday" placeholder="Enter lunch items..."></textarea>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="btn"><i class="fas fa-check"></i> Submit Lunch</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Dinner Form -->
+        <div class="card">
+            <form action="/submit" method="post" onsubmit="return validateForm()">
+                <input type="hidden" name="meal_type" value="dinner">
+                <input type="hidden" name="fromDate" id="hiddenFromDateDinner">
+                <input type="hidden" name="toDate" id="hiddenToDateDinner">
+                <div class="meal-row">
+                    <div class="meal-title"><i class="fas fa-moon"></i> Dinner</div>
+                    <div class="col">
+                        <div class="day-label">Monday</div>
+                        <textarea class="desc-box" name="Monday" placeholder="Enter dinner items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Tuesday</div>
+                        <textarea class="desc-box" name="Tuesday" placeholder="Enter dinner items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Wednesday</div>
+                        <textarea class="desc-box" name="Wednesday" placeholder="Enter dinner items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Thursday</div>
+                        <textarea class="desc-box" name="Thursday" placeholder="Enter dinner items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Friday</div>
+                        <textarea class="desc-box" name="Friday" placeholder="Enter dinner items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Saturday</div>
+                        <textarea class="desc-box" name="Saturday" placeholder="Enter dinner items..."></textarea>
+                    </div>
+                    <div class="col">
+                        <div class="day-label">Sunday</div>
+                        <textarea class="desc-box" name="Sunday" placeholder="Enter dinner items..."></textarea>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="btn"><i class="fas fa-check"></i> Submit Dinner</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Back to Dashboard Button -->
+        <div class="w-full text-center mb-4">
+            <a href="/admin_dashboard" class="btn back-btn"><i class="fas fa-arrow-left"></i>⬅ Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        function validateForm() {
+            let fromDate = document.getElementById("fromDate").value;
+            let toDate = document.getElementById("toDate").value;
+            if (new Date(fromDate) > new Date(toDate)) {
+                alert("Error: 'From Date' cannot be greater than 'To Date'");
+                return false;
+            }
+            return true;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let fromDateInput = document.getElementById("fromDate");
+            let toDateInput = document.getElementById("toDate");
+
+            if (localStorage.getItem("fromDate")) {
+                fromDateInput.value = localStorage.getItem("fromDate");
+            }
+            if (localStorage.getItem("toDate")) {
+                toDateInput.value = localStorage.getItem("toDate");
+            }
+
+            fromDateInput.addEventListener("change", function () {
+                localStorage.setItem("fromDate", this.value);
+            });
+
+            toDateInput.addEventListener("change", function () {
+                localStorage.setItem("toDate", this.value);
+            });
+
+            document.querySelectorAll("form").forEach(form => {
+                form.addEventListener("submit", function () {
+                    let fromDateValue = fromDateInput.value;
+                    let toDateValue = toDateInput.value;
+
+                    form.querySelector("input[name='fromDate']").value = fromDateValue;
+                    form.querySelector("input[name='toDate']").value = toDateValue;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

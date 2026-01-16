@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #343a40;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #6c757d;
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+        .card {
+            background-color: #ffffff;
+            width: 90%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            padding: 12px;
+            width: 100%;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            outline: none;
+            box-sizing: border-box;
+        }
+        input:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 5px rgba(0,123,255,0.5);
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            border-radius: 8px;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0069d9;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        canvas {
+            margin-top: 20px;
+            background-color: #ffffff;
+            border: 1px dashed #ced4da;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        .btn {
+            margin: 20px 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn.download-btn {
+            background-color: #28a745;
+        }
+        .btn.download-btn:hover {
+            background-color: #218838;
+        }
+        .btn.back-btn {
+            background-color: #6c757d;
+            text-decoration:none;
+        }
+        .btn.back-btn:hover {
+            background-color: #5a6268;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📦 Barcode Generator</h1>
+    <h2>Create & Download Your Barcode Easily</h2>
+
+    <div class="card">
+        <input type="text" id="barcodeInput" placeholder="Enter text for barcode...">
+        
+        <div class="button-container">
+            <button class="btn-primary" onclick="generateBarcode()">Generate Barcode</button>
+            <button class="btn-success" onclick="downloadBarcode()">Download Barcode</button>
+        </div>
+
+        <canvas id="barcodeCanvas"></canvas>
+
+        <div class="button-container">
+            <a href="/admin_dashboard" class="btn back-btn" style="text-decoration: none; display: inline-block;">⬅ Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        function generateBarcode() {
+            let input = document.getElementById("barcodeInput").value.trim();
+            if (input === "") {
+                alert("Please enter text to generate barcode.");
+                return;
+            }
+            
+            let canvas = document.getElementById("barcodeCanvas");
+            JsBarcode(canvas, input, {
+                format: "CODE128",
+                displayValue: true,
+                lineColor: "#343a40",
+                width: 2,
+                height: 100,
+                margin: 10,
+                fontSize: 16,
+            });
+        }
+
+        function downloadBarcode() {
+            let input = document.getElementById("barcodeInput").value.trim();
+            if (input === "") {
+                alert("Please enter text to generate barcode first.");
+                return;
+            }
+            
+            let canvas = document.getElementById("barcodeCanvas");
+            let link = document.createElement("a");
+            link.href = canvas.toDataURL("image/png");
+            link.download = input + ".png";
+            link.click();
+        }
+    </script>
+</body>
+</html>

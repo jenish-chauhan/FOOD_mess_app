@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-image: url("/static/images/main_image.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .dashboard-container {
+      text-align: center;
+    }
+
+    .dashboard-card {
+      background: #00000085;
+      padding: 40px 30px;
+      border-radius: 1rem;
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    .dashboard-card h2, .dashboard-card h3 {
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+
+    .student-details p {
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .error-message {
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+
+    .logout-btn, #confirm-payment, #back-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 14px 20px;
+      background-color: #ffffff;
+      color: #333333;
+      font-weight: bold;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .logout-btn:hover, #confirm-payment:hover, #back-btn:hover {
+      background-color: #f0c14b;
+      color: #111111;
+    }
+
+    select#payment-type {
+      width: 100%;
+      padding: 12px;
+      background-color: #333333;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    .qr-image {
+      width: 200px;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Dashboard Card -->
+    <div class="dashboard-card" id="dashboard-card">
+      {% if student %}
+        <h2>👋 Welcome, {{ student.fullname }}</h2>
+        <div class="student-details">
+          <p><strong>🎓 Student ID:</strong> {{ student.student_id }}</p>
+          <p><strong>📞 Phone No:</strong> {{ student.phone_no }}</p>
+          <p><strong>✉️ Email:</strong> {{ student.email }}</p>
+          <p><strong>🏢 Hostel:</strong> {{ student.hostel }}</p>
+          <p><strong>🚪 Room No:</strong> {{ student.room_no }}</p>
+        </div>
+      {% else %}
+        <p class="error-message">⚠️ Error: Student data is missing.</p>
+      {% endif %}
+
+      <button class="logout-btn" id="pay-fees-btn" type="button">Pay Fees</button>
+
+      <form action="{{ url_for('logout') }}" method="get">
+        <button type="submit" class="logout-btn">Logout</button>
+      </form>
+    </div>
+
+    <!-- Payment Card -->
+    <div class="dashboard-card hidden" id="payment-section">
+      <h3>Select Payment Type</h3>
+      <select id="payment-type">
+        <option value="">-- Select --</option>
+        <option value="half">Half (₹9600)</option>
+        <option value="full">Full (₹19200)</option>
+      </select>
+      <div id="qr-section" class="hidden">
+        <img id="qr-image" class="qr-image" src="" alt="QR Code">
+      </div>
+      <button id="confirm-payment" type="button">Confirm Payment</button>
+      <button id="back-btn" type="button">Back</button>
+    </div>
+  </div>
+
+  <script>
+    const payFeesBtn = document.getElementById('pay-fees-btn');
+    const dashboardCard = document.getElementById('dashboard-card');
+    const paymentSection = document.getElementById('payment-section');
+    const paymentType = document.getElementById('payment-type');
+    const qrImage = document.getElementById('qr-image');
+    const qrSection = document.getElementById('qr-section');
+    const confirmBtn = document.getElementById('confirm-payment');
+    const backBtn = document.getElementById('back-btn');
+
+    payFeesBtn.onclick = () => {
+      dashboardCard.classList.add('hidden');
+      paymentSection.classList.remove('hidden');
+    };
+
+    backBtn.onclick = () => {
+      paymentSection.classList.add('hidden');
+      dashboardCard.classList.remove('hidden');
+    };
+
+    paymentType.onchange = () => {
+      if (paymentType.value === 'half') {
+        qrImage.src = "/static/images/9600.png";
+        qrSection.classList.remove('hidden');
+      } else if (paymentType.value === 'full') {
+        qrImage.src = "/static/images/19200.png";
+        qrSection.classList.remove('hidden');
+      } else {
+        qrSection.classList.add('hidden');
+      }
+    };
+
+    confirmBtn.onclick = () => {
+      const type = paymentType.value;
+      if (!type) {
+        alert("Select payment type!");
+        return;
+      }
+      const amount = type === 'half' ? 1 : 2;
+      fetch('/process_payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: "{{ student.student_id }}", amount: amount })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          alert(data.message);
+        }
+      });
+    };
+  </script>
+</body>
+</html>

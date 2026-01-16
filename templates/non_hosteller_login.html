@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Non_Hosteller Student Login</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+
+    
+    <form class="form" method="POST">
+        <p class="form-title">Sign in to Non_Hosteller Student Account</p>
+        <!-- Username input -->
+        <div class="input-container">
+            <input type="text" name="id" placeholder="Enter Student ID" required />
+        </div>
+
+        <!-- Password input -->
+        <div class="input-container">
+            <input type="password" name="password" placeholder="Enter Password" required />
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" class="submit">Sign in</button>
+        <button type="submit" class="submit" onclick="history.back()">Back</button>
+
+        
+        <p class="signup-link">
+            No account?
+            <a onclick="location.href='{{ url_for('studentsignup') }}'">Sign up</a>
+        </p>
+    </form>
+</body>
+
+</html>

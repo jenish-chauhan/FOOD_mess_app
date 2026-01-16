@@ -1,0 +1,64 @@
+/* Basic Header Styles */
+header {
+    background-color: rgba(0, 0, 0, 0.52); /* Matching footer color */
+    color: white;
+    position: fixed; /* Stays at the top */
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 20px;
+    text-align: center;
+    z-index: 1000; /* Ensures the header stays above other elements */
+}
+
+/* Add space to prevent content from hiding behind the fixed header */
+body {
+    padding-top: 60px; /* Adjust based on header height */
+}
+
+/* Header Links */
+header a {
+    color: #f8b400;
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s ease-in-out;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+header a:hover {
+    color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header {
+        padding: 10px 15px;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+    }
+
+    header a {
+        margin: 0 5px;
+        font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+    }
+
+    body {
+        padding-top: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 8px 10px;
+        font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+    }
+
+    header a {
+        margin: 0 3px;
+        font-size: clamp(0.6rem, 1.5vw, 0.7rem);
+    }
+
+    body {
+        padding-top: 45px;
+    }
+}

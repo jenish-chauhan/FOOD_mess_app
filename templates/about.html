@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+
+    <!-- Import Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Inline CSS -->
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap");
+
+        :root {
+            --clr-primary: black;
+            --clr-secondary: #272d36;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Josefin Sans", sans-serif;
+        }
+
+        body {
+            background-image: url("/static/images/main_image.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #000;
+            text-align: center;
+            margin: 0;
+        }
+
+        nav {
+            padding: 0 33px;
+            height: 80px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: #00000085;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        label.logo {
+            font-size: 35px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+        }
+
+        nav ul li {
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            padding: 7px 20px;
+            transition: all 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            border-bottom: 2px solid #ffeb14;
+        }
+
+        /* Section */
+        #about {
+            padding: 150px 20px 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .primary {
+            font-size: 64px;
+            font-weight: 700;
+            color: var(--clr-primary);
+            margin-bottom: 20px;
+        }
+
+        .tertiary {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--clr-secondary);
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            background: #00000085;
+            border-radius: 4px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 22px;
+            display: inline-block;
+            transition: all 0.4s ease-in-out;
+        }
+
+        .btn:hover {
+            transform: rotate(5deg);
+            color: #ffeb14;
+        }
+
+        .visual img {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-top: 40px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <!-- About Section -->
+    <section id="about">
+        <h1 class="primary">About Us</h1>
+        <p class="tertiary">
+            We are passionate about delivering the best services to our customers. Our team is dedicated to innovation, creativity, and making a positive impact.
+        </p>
+        <a href="#menu" class="btn" onclick="location.href='{{ url_for('home') }}'">Home</a>
+
+    </section>
+
+</body>
+</html>

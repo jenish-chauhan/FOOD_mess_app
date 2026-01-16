@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery & Vegetable Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f3f4f6;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+        }
+
+        body.collapsed {
+            margin-left: 80px; /* Matches collapsed sidebar width */
+        }
+
+        .container {
+            max-width: 1200px; /* Limit content width */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center child elements */
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #3b82f6; /* Uniform blue color for all cards */
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 300px; /* Fixed width for cards */
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            animation: fadeIn 0.5s ease-in-out;
+            margin: 1rem;
+            color: #ffffff;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            background: #2563eb; /* Darker blue on hover */
+        }
+
+        .card h5 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .card i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow cards to wrap on smaller screens */
+            gap: 1rem; /* Space between cards */
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                margin-left: 80px; /* Matches collapsed sidebar */
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                max-width: 250px;
+                padding: 1rem;
+            }
+
+            .card h5 {
+                font-size: 1.125rem;
+            }
+
+            .card i {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .card {
+                max-width: 100%; /* Full width on very small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-utensils"></i> Menu Management</h1>
+        <div class="card-row">
+            <div class="card" onclick="window.location.href='/g_v_list'">
+                <i class="fas fa-plus-circle"></i>
+                <h5>➕ Add Grocery & Vegetable</h5>
+            </div>
+            <div class="card" onclick="window.location.href='/g_v_report'">
+                <i class="fas fa-edit"></i>
+                <h5>📋 View Report</h5>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

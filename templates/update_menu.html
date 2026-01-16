@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Menu</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        th { background-color: #f4f4f4; }
+        .editable { cursor: pointer; background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+<h2>Weekly Menu</h2>
+<table>
+    <tr>
+        <th>Meal</th>
+        <th>Monday</th>
+        <th>Tuesday</th>
+        <th>Wednesday</th>
+        <th>Thursday</th>
+        <th>Friday</th>
+        <th>Saturday</th>
+        <th>Sunday</th>
+    </tr>
+    {% for item in menu %}
+    <tr>
+        <td>{{ item.meal }}</td>
+        {% for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
+        <td contenteditable="true" class="editable" data-meal="{{ item.meal }}" data-id="{{ item.id }}" data-day="{{ day }}">
+            {{ item[day] }}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+
+<script>
+    document.querySelectorAll('.editable').forEach(cell => {
+        cell.addEventListener('input', function() {
+            let meal = this.dataset.meal;
+            let id = this.dataset.id;
+            let day = this.dataset.day;
+            let newValue = this.innerText;
+
+            fetch('/update_menu', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ meal, id, day, new_value: newValue })
+            }).then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
+
+</body>
+</html>

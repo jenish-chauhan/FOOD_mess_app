@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore - My Project</title>
+
+    <!-- Import Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Inline CSS -->
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap");
+
+        :root {
+            --clr-primary: black;
+            --clr-secondary: #272d36;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Josefin Sans", sans-serif;
+        }
+
+        body {
+            background-image: url("/static/images/main_image.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #000;
+            text-align: center;
+            margin: 0;
+            color: #000;
+            text-align: center;
+            margin: 0;
+        }
+
+        nav {
+            padding: 0 33px;
+            height: 80px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: #00000085;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        label.logo {
+            font-size: 35px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+        }
+
+        nav ul li {
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            padding: 7px 20px;
+            transition: all 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            border-bottom: 2px solid #ffeb14;
+        }
+
+        /* Section */
+        #explore {
+            padding: 150px 20px 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .primary {
+            font-size: 64px;
+            font-weight: 700;
+            color: var(--clr-primary);
+            margin-bottom: 20px;
+            margin-top: -80px;
+        }
+
+        .tertiary {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--clr-secondary);
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 30%;
+            min-width: 280px;
+            text-align: left;
+            transition: all 0.3s ease-in-out;
+            margin-bottom: 20px;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--clr-primary);
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            background: #00000085;
+            border-radius: 4px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 22px;
+            display: inline-block;
+            transition: all 0.4s ease-in-out;
+            margin-top: 30px;
+        }
+
+        .btn:hover {
+            transform: rotate(5deg);
+            color: #ffeb14;
+        }
+
+        footer {
+            background-color: #272d36;
+            color: white;
+            padding: 20px 0;
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Explore Section -->
+    <section id="explore">
+        <h1 class="primary">Explore Features</h1>
+        <p class="tertiary">
+            Discover a variety of features and tools designed to help you accomplish complex tasks with ease.
+        </p>
+
+        <div class="feature-card">
+            <h3>Feature One</h3>
+            <p>Discover amazing tools and utilities powered by Python that simplify complex tasks effortlessly.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Feature Two</h3>
+            <p>Explore data visualizations, machine learning models, and custom scripts designed to make an impact.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Feature Three</h3>
+            <p>Join our community, collaborate, and contribute to open-source innovation!</p>
+        </div>
+
+        <a href="#menu" class="btn" onclick="location.href='{{ url_for('home') }}'">Home</a>
+    </section>
+
+</body>
+</html>

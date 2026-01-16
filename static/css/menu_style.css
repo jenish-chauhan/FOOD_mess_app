@@ -1,0 +1,108 @@
+body {
+    font-family: Arial, sans-serif;
+    background-image: url("/static/images/delicious-food-table.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    text-align: center;
+    padding: 20px;
+    margin: 0;
+}
+
+h2 {
+    color: #333;
+    margin-top: 90px;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    padding: 0 15px;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin: 20px auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    width: 100%;
+    max-width: 800px;
+    min-width: 300px;
+    height: auto;
+    position: relative;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: clamp(8px, 2vw, 12px);
+    border: 1px solid #ddd;
+    text-align: center;
+    font-size: clamp(0.875rem, 2vw, 1.125rem);
+    word-wrap: break-word;
+}
+
+th {
+    background-color: black;
+    color: white;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
+    h2 {
+        margin-top: 70px;
+        font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+    }
+
+    .table-wrapper {
+        margin: 15px auto;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    th, td {
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    h2 {
+        margin-top: 60px;
+        font-size: clamp(1.1rem, 3vw, 1.5rem);
+    }
+
+    .table-wrapper {
+        margin: 10px auto;
+        border-radius: 8px;
+    }
+
+    table {
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+
+    th, td {
+        padding: 8px 6px;
+        font-size: 0.85rem;
+    }
+}

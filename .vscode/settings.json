@@ -1,0 +1,8 @@
+{
+    "netbeans.jdkhome": "c:\\Program Files\\Java\\jdk-20",
+    "netbeans.project.jdkhome": "c:\\Program Files\\Java\\jdk-20",
+    "terminal.integrated.env.windows": {
+        "JAVA_HOME": "c:\\Program Files\\Java\\jdk-20",
+        "PATH": "c:\\Program Files\\Java\\jdk-20\\bin;${env:PATH}"
+    }
+}

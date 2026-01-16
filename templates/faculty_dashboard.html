@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url("/static/images/main_image.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .dashboard-container {
+            text-align: center;
+        }
+
+        .dashboard-card {
+            background: #00000085;
+            padding: 40px 30px;
+            border-radius: 1rem;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            margin-bottom: 20px;
+        }
+
+        .dashboard-card h2, .dashboard-card h3 {
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .student-details p {
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #error {
+            color: yellow;
+            background-color: red;
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 14px 20px;
+            background-color: #ffffff;
+            color: #333333;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: #f0c14b;
+            color: #111111;
+        }
+
+        #payment-section {
+            display: none;
+        }
+
+        .input-container {
+            margin: 20px 0;
+        }
+
+        .input-container input {
+            background-color: #03030385;
+            padding: 1rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            width: 300px;
+            border-radius: 0.5rem;
+            border: none;
+            color: white;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .qr-image {
+            width: 200px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Main Dashboard -->
+    <div class="dashboard-card" id="dashboard-card">
+        {% if student %}
+            <h2>👋 Welcome, {{ student.fullname }}</h2>
+            <div class="student-details">
+                <p><strong>🎓 Faculty ID:</strong> {{ student.faculty_id }}</p>
+                <p><strong>📞 Phone No:</strong> {{ student.phone_no }}</p>
+                <p><strong>✉️ Email:</strong> {{ student.email }}</p>
+                <p id="error">If you don't have a barcode in your ID Card, meet the Admin.</p>
+            </div>
+        {% else %}
+            <p class="error-message">⚠️ Error: Faculty data is missing.</p>
+        {% endif %}
+
+        <button class="btn" onclick="showPaymentForm()">Enter Balance</button>
+        <form action="{{ url_for('logout') }}" method="get">
+            <button type="submit" class="btn">Logout</button>
+        </form>
+    </div>
+
+    <!-- Payment Section (Initially Hidden) -->
+    <div class="dashboard-card" id="payment-section">
+        <div class="input-container">
+            <input type="number" id="payment-amount" placeholder="Enter Amount" required>
+        </div>
+        <button class="btn" onclick="generateQRCode()">Generate QR Code</button>
+        <div id="qr-code-container"></div>
+        <button class="btn" onclick="confirmPayment()">Confirm Payment</button>
+        <button type="submit" class="btn" onclick="history.back()">Back</button>
+    </div>
+
+</div>
+
+<script>
+    function showPaymentForm() {
+        document.getElementById('dashboard-card').style.display = 'none';
+        document.getElementById('payment-section').style.display = 'block';
+    }
+
+    function generateQRCode() {
+        const amount = parseFloat(document.getElementById('payment-amount').value);
+        if (isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+
+        fetch(`/generate_payment_qr?amount=${amount}`)
+            .then(response => response.blob())
+            .then(imageBlob => {
+                const imageUrl = URL.createObjectURL(imageBlob);
+                document.getElementById('qr-code-container').innerHTML = `<img class="qr-image" src="${imageUrl}" alt="QR Code">`;
+            })
+            .catch(error => {
+                console.error('Error generating QR code:', error);
+                alert("Failed to generate QR code.");
+            });
+    }
+
+    function confirmPayment() {
+        const amount = parseFloat(document.getElementById('payment-amount').value);
+        if (isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+
+        const facultyId = "{{ student.faculty_id|safe }}";  // Ensure safe rendering in JS
+
+        if (!facultyId) {
+            alert("Error: Faculty ID is missing.");
+            return;
+        }
+
+        fetch('/payment_success', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                faculty_id: facultyId,
+                amount: amount
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert("Payment Error: " + data.error);
+            } else {
+                alert("Payment Successful!");
+                window.location.reload();  // Refresh page to update balance
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Failed to confirm payment.");
+        });
+    }
+</script>
+
+</body>
+</html>

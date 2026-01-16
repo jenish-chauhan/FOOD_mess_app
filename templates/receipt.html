@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hostel Receipt (Per Day Basis)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    #receipt-content {
+      width: 180mm; /* Reduced to fit A4 with margins */
+      max-width: 180mm;
+      min-height: 277mm; /* A4 height minus margins */
+      margin: 15mm auto;
+      box-sizing: border-box;
+      font-size: 12pt;
+    }
+
+    .receipt {
+      border: 1px solid #000;
+      padding: 12mm; /* Slightly reduced padding */
+      margin-bottom: 10mm;
+      position: relative;
+      page-break-inside: avoid;
+      box-sizing: border-box;
+    }
+
+    .copy-label {
+      position: absolute;
+      top: 5mm;
+      right: 5mm;
+      font-weight: bold;
+      font-size: 10pt;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 10mm;
+    }
+
+    .header h2 {
+      margin: 0;
+      font-size: 16pt;
+    }
+
+    .header p {
+      margin: 2mm 0;
+      font-size: 10pt;
+    }
+
+    .header h3 {
+      margin: 5mm 0;
+      font-size: 14pt;
+    }
+
+    .details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10mm;
+      font-size: 10pt;
+    }
+
+    .details-table td {
+      padding: 3mm;
+      vertical-align: top;
+    }
+
+    .details-table td.label {
+      font-weight: bold;
+      width: 50mm;
+    }
+
+    .bank-details {
+      border: 1px solid #000;
+      padding: 5mm;
+      margin-top: 10mm;
+      font-size: 10pt;
+    }
+
+    .footer {
+      margin-top: 15mm;
+      text-align: right;
+      font-size: 10pt;
+    }
+
+    .note {
+      font-size: 9pt;
+      margin-top: 10mm;
+    }
+
+    hr {
+      margin: 10mm 0;
+      border: none;
+      border-top: 1px dashed #000;
+    }
+
+    #download {
+      display: block;
+      margin: 10mm auto;
+      padding: 3mm 6mm;
+      background: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 10pt;
+      text-align: center;
+    }
+
+    /* Media query for print/PDF */
+    @media print {
+      #download {
+        display: none;
+      }
+      #receipt-content {
+        margin: 0;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 0;
+      }
+      .receipt {
+        padding: 12mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="receipt-content">
+    <!-- ORIGINAL COPY -->
+    <div class="receipt">
+      <div class="copy-label">Original Copy</div>
+      <div class="header">
+        <h2>S. N. JOSHI</h2>
+        <p>Email: snjoshi@gmail.com</p>
+        <p>Trade License Certificate No. | GSTIN: 24ACVPJ4544C1ZF</p>
+        <h3>Receipt (Per Day Basis)</h3>
+      </div>
+
+      <table class="details-table">
+        <tr>
+          <td class="label">Name:</td><td>{{ student.fullname }}</td>
+          <td class="label">Hostel:</td><td>{{ student.hostel }}</td>
+        </tr>
+        <tr>
+          <td class="label">Mobile No.:</td><td>{{ student.phone_no }}</td>
+          <td class="label">Room No.:</td><td>{{ student.room_no }}</td>
+        </tr>
+        <tr>
+          <td class="label">Payment Type:</td><td>{{ payment_type }}</td>
+          <td class="label">Bank:</td><td>{{ bank_name }}</td>
+        </tr>
+        <tr>
+          <td class="label">Chq/DD/OL Trans. No.:</td><td>{{ transaction_no }}</td>
+          <td class="label">Chq/DD/OL Trans. Date:</td><td>{{ transaction_date }}</td>
+        </tr>
+        <tr>
+          <td class="label">Receipt for Period:</td><td>{{ period_from }} to {{ period_to }}</td>
+          <td class="label">Receipt No.:</td><td id="receipt-number">{{ receipt_number }}</td>
+        </tr>
+        <tr>
+          <td class="label">Date:</td><td>{{ receipt_date }}</td>
+          <td class="label">Total Amount:</td><td>₹{{ total_amount }}</td>
+        </tr>
+      </table>
+
+      <div class="bank-details">
+        <strong>Bank Details:</strong><br>
+        Bank A/C Name: S. N. JOSHI<br>
+        A/C No: 408000586238<br>
+        Branch: VEJALPUR, IFSC: RATN0000188<br>
+        Amount in words: FOUR THOUSAND ONLY
+      </div>
+
+      <div class="footer">
+        <p>(Authorized Signatory)</p>
+      </div>
+
+      <div class="note">
+        <p>Note:</p>
+        <ol>
+          <li>Cheques are subject to realization.</li>
+          <li>Room Rent is Non-Refundable.</li>
+          <li>Above Terms and Conditions Apply.</li>
+        </ol>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- DUPLICATE COPY -->
+    <div class="receipt">
+      <div class="copy-label">Duplicate Copy</div> <!-- Fixed typo: "Radioactive Copy" to "Duplicate Copy" -->
+      <div class="header">
+        <h2>S. N. JOSHI</h2>
+        <p>Email: snjoshi@gmail.com</p>
+        <p>Trade License Certificate No. | GSTIN: 24ACVPJ4544C1ZF</p>
+        <h3>Receipt (Per Day Basis)</h3>
+      </div>
+
+      <table class="details-table">
+        <tr>
+          <td class="label">Name:</td><td>{{ student.fullname }}</td>
+          <td class="label">Hostel:</td><td>{{ student.hostel }}</td>
+        </tr>
+        <tr>
+          <td class="label">Mobile No.:</td><td>{{ student.phone_no }}</td>
+          <td class="label">Room No.:</td><td>{{ student.room_no }}</td>
+        </tr>
+        <tr>
+          <td class="label">Payment Type:</td><td>{{ payment_type }}</td>
+          <td class="label">Bank:</td><td>{{ bank_name }}</td>
+        </tr>
+        <tr>
+          <td class="label">Chq/DD/OL Trans. No.:</td><td>{{ transaction_no }}</td>
+          <td class="label">Chq/DD/OL Trans. Date:</td><td>{{ transaction_date }}</td>
+        </tr>
+        <tr>
+          <td class="label">Receipt for Period:</td><td>{{ period_from }} to {{ period_to }}</td>
+          <td class="label">Receipt No.:</td><td>{{ receipt_number }}</td>
+        </tr>
+        <tr>
+          <td class="label">Date:</td><td>{{ receipt_date }}</td>
+          <td class="label">Total Amount:</td><td>₹{{ total_amount }}</td>
+        </tr>
+      </table>
+
+      <div class="bank-details">
+        <strong>Bank Details:</strong><br>
+        Bank A/C Name: S. N. JOSHI<br>
+        A/C No: 408000586238<br>
+        Branch: VEJALPUR, IFSC: RATN0000188<br>
+        Amount in words: FOUR THOUSAND ONLY
+      </div>
+
+      <div class="footer">
+        <p>(Authorized Signatory)</p>
+      </div>
+
+      <div class="note">
+        <p>Note:</p>
+        <ol>
+          <li>Cheques are subject to realization.</li>
+          <li>Room Rent is Non-Refundable.</li> <!-- Fixed typo: "Ascendancy" to "Rent" -->
+          <li>Above Terms and Conditions Apply.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <button id="download">Download as PDF</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  document.getElementById('download').addEventListener('click', function() {
+    const element = document.getElementById('receipt-content');
+    const receiptNumber = document.getElementById('receipt-number').textContent.trim() || 'unknown';
+    const opt = {
+      margin: [10, 10, 13, 10], // Top, Right, Bottom, Left in mm
+      filename: `${receiptNumber}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save().then(() => {
+      // Wait for 10 seconds (10000 milliseconds)
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 10000);
+    });
+  });
+</script>
+
+
+</body>
+</html>

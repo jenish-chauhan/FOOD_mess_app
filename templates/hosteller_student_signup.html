@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Login</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body class="form-page">
+    
+    <form class="form" method="POST">
+        <p class="form-title">Sign Up</p>
+
+        <div class="input-container">
+            <input type="text" name="student_id" placeholder="Enter Student ID" required />
+        </div>
+
+        <div class="input-container">
+            <input type="text" name="fullname" placeholder="Enter Full Name" required />
+        </div>
+
+        <div class="input-container">
+            <input type="text" name="phone_no" placeholder="Enter Phone No" required />
+        </div>
+
+        <div class="input-container">
+            <input type="email" name="email" placeholder="Enter Email Id" required />
+        </div>
+        
+        <div class="input-container">
+        
+            <select id="options" name="options">
+            <option value="hostel_1">Hostel 1</option>
+            <option value="hostel_2">Hostel 2</option>
+            <option value="hostel_3">Hostel 3</option>
+            <option value="hostel_4">Hostel 4</option>
+            <option value="hostel_5">Hostel 5</option>
+            <option value="hostel_6">Hostel 6</option>
+            <option value="hostel_7">Hostel 7</option>
+            <option value="hostel_8">Hostel 8</option>
+            <option value="hostel_9">Hostel 9</option>
+            </select>
+        </div>
+        
+        <div class="input-container">
+            <input type="room_no" name="room_no" placeholder="Enter Room No" required />
+        </div>
+
+        <div class="input-container">
+            <input type="password" name="password" placeholder="Enter Password" required />
+        </div>
+
+        <button type="submit" class="submit">Sign Up</button>
+        <button type="submit" class="submit" onclick="history.back()">Back</button>
+        
+    </form>
+</body>
+
+</html>

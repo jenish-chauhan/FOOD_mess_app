@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        p {
+            color: #888;
+            font-style: italic;
+        }
+        .editable {
+            cursor: pointer;
+            background-color: #f9f9f9;
+        }
+        .btn {
+            margin: 20px 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn.download-btn {
+            background-color: #28a745;
+        }
+        .btn.download-btn:hover {
+            background-color: #218838;
+        }
+        .btn.back-btn {
+            background-color: #6c757d;
+            text-decoration:none;
+        }
+        .btn.back-btn:hover {
+            background-color: #5a6268;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🍽 Weekly Menu</h1>
+
+    <!-- Breakfast -->
+    <h2>🥞 Breakfast</h2>
+    {% if breakfast %}
+        <table>
+            <tr>
+                {% for col in breakfast[0].keys() %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in breakfast %}
+                <tr>
+                    {% for col, value in row.items() %}
+                        {% if col != 'id' %}
+                            <td contenteditable="true" class="editable" data-meal="breakfast" data-id="{{ row.id }}" data-day="{{ col }}">{{ value }}</td>
+                        {% else %}
+                            <td>{{ value }}</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No breakfast data available.</p>
+    {% endif %}
+
+    <!-- Lunch -->
+    <h2>🍱 Lunch</h2>
+    {% if lunch %}
+        <table>
+            <tr>
+                {% for col in lunch[0].keys() %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in lunch %}
+                <tr>
+                    {% for col, value in row.items() %}
+                        {% if col != 'id' %}
+                            <td contenteditable="true" class="editable" data-meal="lunch" data-id="{{ row.id }}" data-day="{{ col }}">{{ value }}</td>
+                        {% else %}
+                            <td>{{ value }}</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No lunch data available.</p>
+    {% endif %}
+
+    <!-- Dinner -->
+    <h2>🍛 Dinner</h2>
+    {% if dinner %}
+        <table>
+            <tr>
+                {% for col in dinner[0].keys() %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in dinner %}
+                <tr>
+                    {% for col, value in row.items() %}
+                        {% if col != 'id' %}
+                            <td contenteditable="true" class="editable" data-meal="dinner" data-id="{{ row.id }}" data-day="{{ col }}">{{ value }}</td>
+                        {% else %}
+                            <td>{{ value }}</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No dinner data available.</p>
+    {% endif %}
+
+    <!-- Buttons -->
+    <div class="button-container">
+        <button onclick="downloadPDF()" class="btn back-btn">📥 Download Menu as PDF</button>
+        <a href="/admin_dashboard" class="btn back-btn">⬅ Back to Dashboard</a>
+    </div>
+
+    <!-- JavaScript for Inline Editing -->
+    <script>
+        document.querySelectorAll('.editable').forEach(cell => {
+            cell.addEventListener('input', function() {
+                let meal = this.dataset.meal;
+                let id = this.dataset.id;
+                let day = this.dataset.day;
+                let newValue = this.innerText.trim();
+
+                fetch('/update_menu', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ meal, id, day, new_value: newValue })
+                })
+                .then(response => response.json())
+                .then(data => console.log(data.message))
+                .catch(error => console.error('❌ Error:', error));
+            });
+        });
+    </script>
+
+    <script>
+        function downloadPDF() {
+            window.location.href = "/download_menu_pdf";
+        }
+    </script>
+</body>
+</html>
