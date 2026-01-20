@@ -82,7 +82,7 @@
     }
 
     .sidebar ul li {
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
 
     .sidebar ul li a {
@@ -368,9 +368,13 @@
     </div>
     <ul>
       <li><a href="#"><i class="fas fa-tachometer-alt"></i><span class="menu-text">Dashboard</span></a></li>
+      <li><a href="{{ url_for('users_dashboard') }}"><i class="fas fa-users"></i><span class="menu-text">Users</span></a></li>
+      <li><a href="{{ url_for('fees_pay_admin') }}"><i class="fas fa-users"></i><span class="menu-text">Fees Payment</span></a></li>
       <li><a href="{{ url_for('menu_dashboard') }}"><i class="fas fa-utensils"></i><span class="menu-text">Menu</span></a></li>
+      <li><a href="{{ url_for('generate_barcode') }}"><i class="fas fa-barcode"></i><span class="menu-text">Barcode</span></a></li>
       <li><a href="{{ url_for('daily_report') }}"><i class="fas fa-chart-line"></i><span class="menu-text">Reports</span></a></li>
       <li><a href="{{ url_for('g_v') }}"><i class="fas fa-carrot"></i><span class="menu-text">Grocery & Vegetable</span></a></li>
+
     </ul>
     <a href="{{ url_for('admin_login') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
   </div>

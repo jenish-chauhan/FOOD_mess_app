@@ -6,4 +6,3 @@ qrcode
 pandas
 fpdf
 reportlab
-gunicorn

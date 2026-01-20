@@ -1,43 +1,16 @@
-# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-env/
-ENV/
-*.egg-info/
-dist/
-build/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# IDE
+.git/
+.gitignore
+
 .vscode/
-.idea/
-*.swp
-*.swo
-*~
+.dist/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Documentation
-*.md
-!README.md
-
-# Docker
-docker-compose.yml
-Dockerfile
-.dockerignore
-
-# Environment files
-.env
-.env.local
-
-# SQL files (already copied via volume in docker-compose)
-# track_serve.sql
-# track_serve_Final.sql
-
-# Logs
 *.log
+
