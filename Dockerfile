@@ -51,7 +51,12 @@ RUN set -eux; \
   done; \
   mysql --socket=/tmp/mysql.sock -uroot -e "CREATE DATABASE IF NOT EXISTS track_serve;"; \
   mysql --socket=/tmp/mysql.sock -uroot track_serve < /app/track_serve_Final.sql; \
-  mysql --socket=/tmp/mysql.sock -uroot track_serve < /app/track_serve.sql; \
+  # The two provided dumps overlap. Make the second import idempotent so the build
+  # doesn't fail on "table already exists"/duplicate inserts.
+  sed -e 's/^CREATE TABLE `/CREATE TABLE IF NOT EXISTS `/' \
+      -e 's/^INSERT INTO /INSERT IGNORE INTO /' \
+      /app/track_serve.sql \
+    | mysql --socket=/tmp/mysql.sock -uroot track_serve; \
   mysqladmin --socket=/tmp/mysql.sock -uroot shutdown; \
   rm -f /tmp/mysql.sock /tmp/mysqld.pid
 
