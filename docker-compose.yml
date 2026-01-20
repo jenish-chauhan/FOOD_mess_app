@@ -1,28 +1,23 @@
+version: "3.8"
 services:
   db:
     image: mysql:8.0
     container_name: track_serve_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-StrongPassword123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME:-track_serve}
       MYSQL_USER: ${DB_USER:-trackserve}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-StrongPassword123}
-    ports:
-      - "3306:3306"
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    # Do NOT publish MySQL to the public network. Keep it internal to compose network.
+    # ports: [ "3306:3306" ]
     volumes:
       - db_data:/var/lib/mysql
-      # Auto-import SQL files on first initialization
+      # Auto-import SQL files on first initialization (bind specific files into initdir)
       - ./track_serve.sql:/docker-entrypoint-initdb.d/01-track_serve.sql:ro
       - ./track_serve_Final.sql:/docker-entrypoint-initdb.d/02-track_serve_Final.sql:ro
     healthcheck:
-      test:
-        [
-          "CMD",
-          "sh",
-          "-c",
-          "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD",
-        ]
+      test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p\$\$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,6 +29,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: trackserve:latest
     container_name: track_serve_backend
     restart: unless-stopped
     depends_on:
@@ -43,14 +39,15 @@ services:
       DB_HOST: db
       DB_PORT: ${DB_PORT:-3306}
       DB_USER: ${DB_USER:-trackserve}
-      DB_PASSWORD: ${DB_PASSWORD:-StrongPassword123}
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME:-track_serve}
       FLASK_ENV: production
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
     ports:
       - "5000:5000"
     volumes:
-      # Mount static and templates for development hot-reload (optional)
-      # Remove these volumes in production for better security
+      # Keep templates/static mounted read-only so updates are easier in dev;
+      # these can be removed in a strict production deployment if desired.
       - ./static:/app/static:ro
       - ./templates:/app/templates:ro
     networks:

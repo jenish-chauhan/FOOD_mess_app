@@ -26,4 +26,6 @@ sys.exit(1)
 PY
 
 echo "Starting application"
-exec gunicorn --bind 0.0.0.0:5000 main:app
+# Use GUNICORN_WORKERS env var or default to 3
+GUNICORN_WORKERS=${GUNICORN_WORKERS:-3}
+exec gunicorn --workers ${GUNICORN_WORKERS} --bind 0.0.0.0:5000 main:app

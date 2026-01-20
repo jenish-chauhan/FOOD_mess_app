@@ -1,37 +1,44 @@
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Food Store</title>
     <!-- CSS -->
-    <link rel="stylesheet" href= "{{ url_for('static', filename='css/header.css') }}" />
-    <link rel="stylesheet" href= "{{ url_for('static', filename='css/style.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/header.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
     <!-- Ionicons for mobile menu icon -->
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-</head>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
+  </head>
 
-<body>
+  <body>
     <!-- Menu -->
     <div class="menu">
-        <nav>
-            <input type="checkbox" id="check" />
-            <label for="check" class="checkbtn">
-                <ion-icon name="menu-outline"></ion-icon>
-            </label>
+      <nav>
+        <input type="checkbox" id="check" />
+        <label for="check" class="checkbtn">
+          <ion-icon name="menu-outline"></ion-icon>
+        </label>
 
-            <label class="logo">Track & Serve</label>
+        <label class="logo">Track & Serve</label>
 
-            <ul>
-                <li><a href="#hero-section" class="active">Home</a></li>
-                <li><a onclick="location.href='{{ url_for('explore') }}'">Explore</a></li>
-                <li><a onclick="location.href='{{ url_for('about') }}'">About</a></li>
-                <li><a onclick="location.href='{{ url_for('user') }}'">User</a></li>
-                <li><a onclick="location.href='{{ url_for('adminlogin') }}'">Admin</a></li>
-            </ul>
-        </nav>
+        <ul>
+          <li><a href="#hero-section" class="active">Home</a></li>
+        </ul>
+      </nav>
     </div>
-</body>
+  </body>
 </html>
