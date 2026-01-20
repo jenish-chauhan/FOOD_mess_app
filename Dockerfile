@@ -149,6 +149,15 @@ RUN set -eux; \
   if [ -d /usr/lib/mysql/plugin ]; then \
     for so in /usr/lib/mysql/plugin/*.so; do [ -f "$so" ] && copy_deps "$so" || true; done; \
   fi; \
+  # Ensure ICU libraries are included. Some MySQL builds dlopen ICU (libicuuc.so.*)
+  # which may not be visible to ldd for mysqld; explicitly copy them so the
+  # distroless runtime has the required libicu*.so files.
+  for icu in /usr/lib/x86_64-linux-gnu/libicu*.so*; do \
+    [ -f "$icu" ] && copy_file "$icu" || true; \
+  done; \
+  # Also copy dependencies for a representative ICU library so linked
+  # transitive libs are included in the runtime.
+  if [ -f /usr/lib/x86_64-linux-gnu/libicuuc.so.74 ]; then copy_deps /usr/lib/x86_64-linux-gnu/libicuuc.so.74 || true; fi; \
   \
   # Shared libs for Python extension modules installed in the venv.
   find /opt/venv -type f -name '*.so' -print0 | while IFS= read -r -d '' so; do copy_deps "$so"; done; \
