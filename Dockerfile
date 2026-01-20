@@ -11,7 +11,9 @@ RUN apt-get update \
        build-essential \
        default-libmysqlclient-dev \
        pkg-config \
-       netcat-traditional \
+         netcat-traditional \
+         libssl-dev \
+         libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps
@@ -26,5 +28,8 @@ COPY . .
 # Expose port for gunicorn
 EXPOSE 5000
 
-# Wait for DB then start application
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+# Copy entrypoint that waits for DB and starts gunicorn
+COPY app-entrypoint.sh /usr/local/bin/app-entrypoint.sh
+RUN chmod +x /usr/local/bin/app-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/app-entrypoint.sh"]

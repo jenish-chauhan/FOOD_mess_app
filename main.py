@@ -53,7 +53,7 @@ def get_db_connection():
     Returns: pymysql connection object or None if connection fails
     """
     try:
-        # Prepare connection parameters
+        # Prepare connection parameters for PyMySQL
         connection_params = {
             'host': DB_CONFIG['host'],
             'port': DB_CONFIG['port'],
@@ -63,9 +63,51 @@ def get_db_connection():
             'charset': DB_CONFIG.get('charset', 'utf8mb4'),
             'cursorclass': DictCursor
         }
-        
-        connection = pymysql.connect(**connection_params)
-        return connection
+
+        # Try PyMySQL first (fast and lightweight). If the server uses
+        # caching_sha2_password and cryptography is missing, this may raise
+        # an error; the requirements were updated to include 'cryptography'.
+        try:
+            connection = pymysql.connect(**connection_params)
+            return connection
+        except Exception as e_py:
+            # If PyMySQL fails due to auth plugin issues, try mysql-connector as a fallback.
+            print(f"PyMySQL connection failed: {e_py}")
+            print("Attempting fallback using mysql.connector...")
+
+            try:
+                # Use mysql.connector with dictionary cursors to match pymysql.DictCursor behavior
+                conn_mc = mysql.connector.connect(
+                    host=DB_CONFIG['host'],
+                    port=DB_CONFIG['port'],
+                    user=DB_CONFIG['user'],
+                    password=DB_CONFIG['password'],
+                    database=DB_CONFIG['database'],
+                    charset=DB_CONFIG.get('charset', 'utf8mb4')
+                )
+
+                # Wrap mysql.connector connection so callers can call .cursor()
+                class MySQLConnectorWrapper:
+                    def __init__(self, conn):
+                        self._conn = conn
+
+                    def cursor(self):
+                        return self._conn.cursor(dictionary=True)
+
+                    def commit(self):
+                        return self._conn.commit()
+
+                    def close(self):
+                        return self._conn.close()
+
+                    def __getattr__(self, name):
+                        return getattr(self._conn, name)
+
+                return MySQLConnectorWrapper(conn_mc)
+            except Exception as e_mc:
+                print(f"Fallback mysql.connector connection failed: {e_mc}")
+                raise
+
     except pymysql.MySQLError as e:
         print(f"Error connecting to MySQL: {e}")
         print(f"Attempted connection to: {DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}")
