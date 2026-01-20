@@ -1,3 +1,34 @@
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    POETRY_VIRTUALENVS_CREATE=false
+
+WORKDIR /app
+
+# Install minimal OS deps (kept small). We avoid compiling C extensions by
+# relying on pure-Python DB drivers already in requirements.txt.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       ca-certificates \
+       gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps.
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -r /app/requirements.txt \
+    && pip install --no-cache-dir gunicorn
+
+# Copy application code.
+COPY . /app
+
+# Entrypoint that waits for DB then starts gunicorn.
+COPY app-entrypoint.sh /usr/local/bin/app-entrypoint.sh
+RUN chmod +x /usr/local/bin/app-entrypoint.sh
+
+EXPOSE 5000
+
+ENTRYPOINT ["/usr/local/bin/app-entrypoint.sh"]
 # syntax=docker/dockerfile:1.7
 
 FROM ubuntu:24.04 AS builder
