@@ -17,7 +17,13 @@ services:
       - ./track_serve.sql:/docker-entrypoint-initdb.d/01-track_serve.sql:ro
       - ./track_serve_Final.sql:/docker-entrypoint-initdb.d/02-track_serve_Final.sql:ro
     healthcheck:
-      test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p\$\$MYSQL_ROOT_PASSWORD"]
+      test:
+        [
+          "CMD",
+          "sh",
+          "-c",
+          "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
