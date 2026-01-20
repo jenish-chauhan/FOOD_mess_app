@@ -69,6 +69,16 @@ RUN set -eux; \
     dest="/opt/runtime${src}"; \
     mkdir -p "$(dirname "$dest")"; \
     cp -a "$src" "$dest"; \
+    # If src is a symlink, also copy the real target so the runtime loader
+    # always has the actual .so file (distroless won't have the full tree).
+    if [ -L "$src" ]; then \
+      real="$(readlink -f "$src" || true)"; \
+      if [ -n "${real:-}" ] && [ -f "$real" ]; then \
+        real_dest="/opt/runtime${real}"; \
+        mkdir -p "$(dirname "$real_dest")"; \
+        cp -a "$real" "$real_dest"; \
+      fi; \
+    fi; \
   }; \
   copy_deps() { \
     f="$1"; \
@@ -151,6 +161,7 @@ RUN set -eux; \
 FROM gcr.io/distroless/base-debian12
 
 ENV PATH="/opt/venv/bin:/usr/sbin:/usr/bin:/bin" \
+    LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib:/usr/lib" \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
