@@ -208,6 +208,42 @@ strong {
     color: #ffeb14;
 }
 
+/* Admin Login Button */
+.admin-login-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    border-radius: 12px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 600;
+    margin: 25px 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(31, 41, 55, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-login-btn i {
+    font-size: 1.25rem;
+}
+
+.admin-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(31, 41, 55, 0.6);
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.admin-login-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(31, 41, 55, 0.4);
+}
+
 .button {
     --accent: fuchsia;
     border: none;
