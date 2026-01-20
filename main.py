@@ -25,8 +25,8 @@ except ImportError:
     DB_CONFIG = {
         'host': 'localhost',
         'port': 3306,
-        'user': 'trackserve',
-        'password': 'StrongPassword123',
+        'user': 'root',
+        'password': '',
         'database': 'track_serve',
         'charset': 'utf8mb4',
         'cursorclass': 'DictCursor'
@@ -1642,6 +1642,9 @@ def g_v_list():
     if meal_type in ["breakfast", "lunch", "dinner"]:
         try:
             conn = get_db_connection()
+            if not conn:
+                flash("Database connection failed!", "danger")
+                return render_template("g_v_list.html", meal_type=meal_type, menu_items=menu_items)
             cursor = conn.cursor()
             today = datetime.now().date()
             weekday = today.strftime('%A')  # e.g., 'Monday'

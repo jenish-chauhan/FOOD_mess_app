@@ -143,17 +143,17 @@
       </thead>
       <tbody id="meal_table">
         {% if menu_items %}
-          {% for item in menu_items %}
-          <tr>
+        {% for item in menu_items %}
+        <tr>
             <td>{{ meal_type.capitalize() if meal_type else '' }}</td>
-            <td><textarea name="menu_item[]" readonly>{{ item }}</textarea></td>
+          <td><textarea name="menu_item[]" readonly>{{ item }}</textarea></td>
             <td><textarea name="grocery[]" placeholder="Enter grocery items"></textarea></td>
             <td><textarea name="vegetable[]" placeholder="Enter vegetables"></textarea></td>
             <td><textarea name="khanabcha[]" placeholder="Enter khana bacha"></textarea></td>
             <td><textarea name="khanaghata[]" placeholder="Enter khana ghata"></textarea></td>
             <td><textarea name="remark[]" placeholder="Enter remarks"></textarea></td>
-          </tr>
-          {% endfor %}
+        </tr>
+        {% endfor %}
         {% else %}
           <tr>
             <td colspan="7" class="text-center text-muted">
@@ -171,7 +171,7 @@
 
   <div class="text-center">
     {% if menu_items %}
-      <button type="submit" class="btn btn-submit btn-custom">✅ Submit</button>
+    <button type="submit" class="btn btn-submit btn-custom">✅ Submit</button>
     {% else %}
       <button type="submit" class="btn btn-submit btn-custom" disabled>✅ Submit (No items to submit)</button>
     {% endif %}
