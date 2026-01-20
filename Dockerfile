@@ -49,14 +49,15 @@ RUN set -eux; \
     if mysqladmin --socket=/tmp/mysql.sock -uroot ping >/dev/null 2>&1; then break; fi; \
     sleep 1; \
   done; \
+  # Make sure the app can connect as root with empty password over TCP.
+  mysql --socket=/tmp/mysql.sock -uroot -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';"; \
+  mysql --socket=/tmp/mysql.sock -uroot -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY '';"; \
+  mysql --socket=/tmp/mysql.sock -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION; FLUSH PRIVILEGES;"; \
   mysql --socket=/tmp/mysql.sock -uroot -e "CREATE DATABASE IF NOT EXISTS track_serve;"; \
   mysql --socket=/tmp/mysql.sock -uroot track_serve < /app/track_serve_Final.sql; \
-  # The two provided dumps overlap. Make the second import idempotent so the build
-  # doesn't fail on "table already exists"/duplicate inserts.
-  sed -e 's/^CREATE TABLE `/CREATE TABLE IF NOT EXISTS `/' \
-      -e 's/^INSERT INTO /INSERT IGNORE INTO /' \
-      /app/track_serve.sql \
-    | mysql --socket=/tmp/mysql.sock -uroot track_serve; \
+  # The two provided dumps overlap. Import the second with --force so the build
+  # doesn't crash on duplicate DDL/data. (We still bake the resulting DB into image.)
+  mysql --socket=/tmp/mysql.sock -uroot --force track_serve < /app/track_serve.sql || true; \
   mysqladmin --socket=/tmp/mysql.sock -uroot shutdown; \
   rm -f /tmp/mysql.sock /tmp/mysqld.pid
 
