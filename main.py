@@ -998,12 +998,16 @@ def download_menu_pdf():
         if not date_range:
             return jsonify({"error": "No data found for the current week"}), 404
 
+        # Debugging: Ensure date_range is a dict
+        if not isinstance(date_range, dict):
+             return jsonify({"error": "Internal Error", "details": f"date_range is not a dict, it is {type(date_range)}: {str(date_range)}"}), 500
+
         # Robust access to keys (case-insensitive)
         keys = {k.upper(): v for k, v in date_range.items()}
         from_date = str(keys.get("FROM_DATE", ""))
         to_date = str(keys.get("TO_DATE", ""))
 
-        print(f"Generating PDF for: {from_date} - {to_date}")  # Debugging print
+        print(f"Generating PDF for: {from_date} - {to_date}")
 
         meals = {
             "Breakfast": extract_meal_data(breakfast),
@@ -1014,10 +1018,16 @@ def download_menu_pdf():
         pdf_file = generate_pdf(from_date, meals)
         return send_file(pdf_file, as_attachment=True)
     except Exception as e:
-        print(f"Error generating PDF: {e}")
         import traceback
-        traceback.print_exc()
-        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+        tb = traceback.format_exc()
+        print(f"Error generating PDF: {e}")
+        # Return the traceback in the response so we can see it in the browser
+        return jsonify({
+            "error": "Internal Server Error", 
+            "message": str(e), 
+            "traceback": tb,
+            "type_date_range": str(type(date_range)) if 'date_range' in locals() else "N/A"
+        }), 500
 
 
 
