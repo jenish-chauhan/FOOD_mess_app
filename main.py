@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash,session,jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file
 import pymysql.cursors
 from pymysql.cursors import DictCursor
 import random
@@ -16,6 +16,9 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from collections import defaultdict, OrderedDict
+import os
+import secrets
+from functools import wraps
 
 # Import database configuration
 try:
@@ -33,7 +36,174 @@ except ImportError:
     }
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Required for flash messages
+# NOTE: In production, set a strong secret key via environment variable.
+# This prevents session tampering and is required for secure signed cookies.
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "CHANGE_ME_IN_PRODUCTION")
+
+# Harden cookie settings (safe defaults; secure cookies require HTTPS).
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE=os.getenv("SESSION_COOKIE_SAMESITE", "Lax"),
+    SESSION_COOKIE_SECURE=(os.getenv("SESSION_COOKIE_SECURE", "0") == "1"),
+)
+
+# Session keys used for admin single-session enforcement.
+ADMIN_SESSION_ID_KEY = "admin_id"
+ADMIN_SESSION_TOKEN_KEY = "admin_session_token"
+
+# Flask endpoint names that require an authenticated admin session.
+# These names must match the route function names (not URLs).
+ADMIN_PROTECTED_ENDPOINTS = {
+    "admin_dashboard",
+    "menu_dashboard",
+    "add_menu",
+    "add_breakfast_menu",
+    "submit",
+    "delete_menu",
+    "delete_menu_item",
+    "users_dashboard",
+    "fees_pay_admin",
+    "download_excel",
+    "download_pdf",
+    "daily_report",
+    "download_report",
+    "g_v_list",
+    "g_v_report",
+    "delete_gv_row",
+}
+
+
+def _generate_session_token() -> str:
+    """
+    Generate a cryptographically-secure session token.
+    - URL-safe (cookie/session friendly)
+    - Sufficient entropy for production
+    """
+    return secrets.token_urlsafe(32)
+
+
+def _set_admin_token_in_db(admin_id: int, token: str) -> None:
+    """
+    Persist current active admin session token in DB.
+    Overwriting the previous token enforces single active session per admin.
+    """
+    conn = get_db_connection()
+    if not conn:
+        raise RuntimeError("Database connection not available")
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE admin SET session_token=%s, session_token_created_at=NOW() WHERE id=%s",
+                (token, admin_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _get_admin_token_from_db(admin_id: int):
+    """Fetch the currently active admin session token from DB."""
+    conn = get_db_connection()
+    if not conn:
+        return None
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT session_token FROM admin WHERE id=%s", (admin_id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            # Works with both DictCursor + regular cursor outputs
+            if isinstance(row, dict):
+                return row.get("session_token")
+            return row[0]
+    finally:
+        conn.close()
+
+
+def _invalidate_admin_session_local() -> None:
+    """
+    Invalidate local session immediately.
+    Do not log token values (security).
+    """
+    session.pop(ADMIN_SESSION_ID_KEY, None)
+    session.pop(ADMIN_SESSION_TOKEN_KEY, None)
+
+
+def _start_admin_session(admin_id: int) -> None:
+    """
+    Prevent session fixation by clearing existing session and issuing a new token.
+    """
+    session.clear()
+    token = _generate_session_token()
+    _set_admin_token_in_db(admin_id, token)
+    session[ADMIN_SESSION_ID_KEY] = admin_id
+    session[ADMIN_SESSION_TOKEN_KEY] = token
+
+
+def _admin_session_valid() -> bool:
+    """
+    Validate that the admin's local session token matches DB.
+    If it doesn't match, the admin has logged in elsewhere and this device must be logged out.
+    """
+    admin_id = session.get(ADMIN_SESSION_ID_KEY)
+    token = session.get(ADMIN_SESSION_TOKEN_KEY)
+    if not admin_id or not token:
+        return False
+    db_token = _get_admin_token_from_db(int(admin_id))
+    # Constant-time comparison to avoid leaking timing info.
+    return bool(db_token) and secrets.compare_digest(str(db_token), str(token))
+
+
+def admin_required(view_func):
+    """
+    Decorator for admin-only endpoints.
+    On token mismatch: force logout + 401 (API) or redirect (HTML).
+    """
+
+    @wraps(view_func)
+    def wrapper(*args, **kwargs):
+        if _admin_session_valid():
+            return view_func(*args, **kwargs)
+
+        _invalidate_admin_session_local()
+
+        # If it's an API/AJAX call, return 401.
+        wants_json = (
+            request.is_json
+            or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+            or "application/json" in request.headers.get("Accept", "")
+        )
+        if wants_json:
+            return jsonify({"error": "Unauthorized"}), 401
+        return redirect(url_for("adminlogin"))
+
+    return wrapper
+
+
+@app.before_request
+def _enforce_single_active_admin_session():
+    """
+    Middleware-style enforcement:
+    If the request targets an admin-protected endpoint, ensure the session token
+    matches the DB token. This supports single-device admin logins.
+    """
+    endpoint = request.endpoint
+    if not endpoint or endpoint not in ADMIN_PROTECTED_ENDPOINTS:
+        return None
+
+    if _admin_session_valid():
+        return None
+
+    _invalidate_admin_session_local()
+
+    wants_json = (
+        request.is_json
+        or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or "application/json" in request.headers.get("Accept", "")
+    )
+    if wants_json:
+        return jsonify({"error": "Unauthorized"}), 401
+    return redirect(url_for("adminlogin"))
 
 # Twilio Configuration (Replace with actual credentials)
 TWILIO_ACCOUNT_SID = 'AC4e0aa03e7f5f64def50de992f6cca778'
@@ -157,7 +327,13 @@ def adminlogin():
                 user = cursor.fetchone()
 
                 if user:
-                    return redirect(url_for('admin_dashboard'))  # Successful login
+                    # Successful login:
+                    # - generate a new session token
+                    # - store it in DB (overwrites any previous token)
+                    # - store it in the signed session cookie
+                    admin_id = user["id"] if isinstance(user, dict) else user[0]
+                    _start_admin_session(int(admin_id))
+                    return redirect(url_for('admin_dashboard'))
                 else:
                     return render_template('admin_login.html', error="Invalid username or password")
 
@@ -173,6 +349,7 @@ def adminlogin():
     return render_template('admin_login.html')
 
 @app.route('/admin_dashboard')
+@admin_required
 def admin_dashboard():
     return render_template("admin_dashboard.html")
 
@@ -337,6 +514,32 @@ def logout():
     session.clear()
     return redirect(url_for('user'))
 
+
+@app.route("/admin_logout")
+def admin_logout():
+    """
+    Admin logout:
+    - clears local session
+    - clears DB token so any stolen cookie can't be reused
+    """
+    admin_id = session.get(ADMIN_SESSION_ID_KEY)
+    _invalidate_admin_session_local()
+
+    if admin_id:
+        conn = get_db_connection()
+        if conn:
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE admin SET session_token=NULL, session_token_created_at=NULL WHERE id=%s",
+                        (int(admin_id),),
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+
+    return redirect(url_for("adminlogin"))
+
 @app.route('/non_hosteller_student_signup', methods=['GET', 'POST'])
 def non_hosteller_student_signup():
     if request.method == "POST":
@@ -487,14 +690,17 @@ def facultydeshboard():
     return render_template("faculty_dashboard.html", student=student)
 
 @app.route('/menu_dashboard')
+@admin_required
 def menu_dashboard():
     return render_template('menu_dashboard.html')
 
 @app.route('/add_menu')
+@admin_required
 def add_menu():
     return render_template('add_menu_dashboard.html')
 
 @app.route('/add_breakfast_menu')
+@admin_required
 def add_breakfast_menu():
     return render_template('add_breakfast_menu.html')
 
@@ -504,6 +710,7 @@ def index():
     return render_template('add_menu_dashboard.html')
 
 @app.route('/submit', methods=['POST'])
+@admin_required
 def submit():
     meal_type = request.form.get('meal_type')
     from_date = request.form.get("fromDate")
@@ -766,6 +973,7 @@ def download_menu_pdf():
 
 # Fetch all menu data for deletion
 @app.route('/delete_menu', methods=['GET'])
+@admin_required
 def delete_menu():
     try:
         connection = get_db_connection()
@@ -793,6 +1001,7 @@ def delete_menu():
 
 # Handle menu deletion
 @app.route('/delete_menu/<meal>/<int:menu_id>', methods=['POST'])
+@admin_required
 def delete_menu_item(meal, menu_id):
     try:
         connection = get_db_connection()
@@ -810,6 +1019,7 @@ def delete_menu_item(meal, menu_id):
             connection.close()
 
 @app.route('/users_dashboard', methods=['GET'])
+@admin_required
 def users_dashboard():
     try:
         connection = get_db_connection()
@@ -942,11 +1152,13 @@ def create_user_report():
     return output
 
 @app.route('/download/excel')
+@admin_required
 def download_excel():
     excel_data = create_user_report()
     return send_file(excel_data, download_name="Users_Report.xlsx", as_attachment=True)
 
 @app.route('/download/pdf')
+@admin_required
 def download_pdf():
     connection = get_db_connection()
     with connection.cursor() as cursor:
@@ -1410,6 +1622,7 @@ def generate_barcode():
 
 
 @app.route('/daily_report', methods=['GET', 'POST'])
+@admin_required
 def daily_report():
     data = {
         "hostel_student": {"breakfast": [], "lunch": [], "dinner": []},
@@ -1452,6 +1665,7 @@ def daily_report():
     return render_template('daily_report.html', data=data, date_input=date_input, category_totals=category_totals)
 
 @app.route('/download/<file_type>/<date_input>')
+@admin_required
 def download_report(file_type, date_input):
     table_date = "_".join(reversed(date_input.split("-")))
     categories = ["hostel_student", "non_hostel_student", "faculty"]
@@ -1613,6 +1827,7 @@ def generate_pdf(data_list, date):
 
 
 @app.route("/g_v_list", methods=["GET", "POST"])
+@admin_required
 def g_v_list():
     if request.method == "POST":
         # POST processing
@@ -1716,6 +1931,7 @@ def g_v_list():
     return render_template("g_v_list.html", meal_type=meal_type, menu_items=menu_items)
 
 @app.route("/g_v_report")
+@admin_required
 def g_v_report():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -1749,6 +1965,7 @@ def g_v_report():
 
 
 @app.route("/delete_gv_row", methods=["POST"])
+@admin_required
 def delete_gv_row():
     row_id = request.form.get("id")
     
@@ -1831,6 +2048,7 @@ def hostel_student_login():
 
 
 @app.route("/fees_pay_admin", methods=['GET', 'POST'])
+@admin_required
 def fees_pay_admin():
     if request.method == 'POST':
         user_type = request.form['user_type']

@@ -1,0 +1,11 @@
+cat > .env <<'EOF'
+MYSQL_ROOT_PASSWORD=ChangeThisRootPassw0rd!
+DB_USER=trackserve
+DB_PASSWORD=StrongDbPassw0rd!
+DB_NAME=track_serve
+DB_PORT=3306
+GUNICORN_WORKERS=3
+EOF
+
+//for the memory use 
+free -h

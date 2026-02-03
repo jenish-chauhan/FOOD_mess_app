@@ -804,7 +804,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `fullname`, `phone_no`, `email_id`, `password`) VALUES
-(1, 'Gajera Prince Laxmanbhai', '7862017545', 'princegajera0506@gmail.com', '0506');
+(1, 'Gajera Prince Laxmanbhai', '9510923323', '90@09HOPQW', 'NoN@IT732');
 
 -- --------------------------------------------------------
 
