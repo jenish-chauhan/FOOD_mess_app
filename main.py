@@ -923,7 +923,7 @@ class CustomPDF(FPDF):
         self.ln(5)
 
 # Function to Generate PDF
-def generate_pdf(from_date, meals):
+def generate_weekly_menu_pdf(from_date, meals):
     file_name = f"{from_date}_Menu.pdf"
     
     pdf = CustomPDF(orientation="L", unit="mm", format="A4")
@@ -1015,7 +1015,7 @@ def download_menu_pdf():
             "Dinner": extract_meal_data(dinner),
         }
 
-        pdf_file = generate_pdf(from_date, meals)
+        pdf_file = generate_weekly_menu_pdf(from_date, meals)
         return send_file(pdf_file, as_attachment=True)
     except Exception as e:
         import traceback
