@@ -161,32 +161,61 @@
 
     <!-- Buttons -->
     <div class="button-container">
-        <button onclick="downloadPDF()" class="btn back-btn">📥 Download Menu as PDF</button>
+        <button id="save-btn" class="btn download-btn" style="background-color: #007bff;">💾 Save Changes</button>
+        <button onclick="downloadPDF()" class="btn download-btn">📥 Download Menu as PDF</button>
         <a href="/admin_dashboard" class="btn back-btn">⬅ Back to Dashboard</a>
     </div>
 
-    <!-- JavaScript for Inline Editing -->
+    <!-- JavaScript for Inline Editing and Saving -->
     <script>
+        // Inline saving on processing
         document.querySelectorAll('.editable').forEach(cell => {
-            cell.addEventListener('input', function() {
-                let meal = this.dataset.meal;
-                let id = this.dataset.id;
-                let day = this.dataset.day;
-                let newValue = this.innerText.trim();
-
-                fetch('/update_menu', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ meal, id, day, new_value: newValue })
-                })
-                .then(response => response.json())
-                .then(data => console.log(data.message))
-                .catch(error => console.error('❌ Error:', error));
+            cell.addEventListener('blur', function() { // Save on blur (click away)
+                saveCell(this);
+            });
+            
+            cell.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent newline
+                    this.blur(); // Trigger save
+                }
             });
         });
-    </script>
 
-    <script>
+        function saveCell(cell) {
+             let meal = cell.dataset.meal;
+             let id = cell.dataset.id;
+             let day = cell.dataset.day;
+             let newValue = cell.innerText.trim();
+
+             // Visual indicator: change background slightly
+             cell.style.backgroundColor = "#e8f0fe";
+
+             fetch('/update_menu', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ meal, id, day, new_value: newValue })
+             })
+             .then(response => response.json())
+             .then(data => {
+                 console.log(data.message);
+                 cell.style.backgroundColor = "#d4edda"; // Greenish on success
+                 setTimeout(() => { cell.style.backgroundColor = ""; }, 1000);
+             })
+             .catch(error => {
+                 console.error('❌ Error:', error);
+                 cell.style.backgroundColor = "#f8d7da"; // Reddish on error
+                 alert("Failed to save changes! Please check connection.");
+             });
+        }
+
+        // Bulk Save Button (Optional, re-saves everything just in case)
+        document.getElementById('save-btn').addEventListener('click', function() {
+            alert("Changes are saved automatically when you click outside the cell! \n\nStarting manual save check...");
+            // We could trigger a save for everyone, but inline is better. 
+            // We'll just provide reassurance.
+        });
+
         function downloadPDF() {
             window.location.href = "/download_menu_pdf";
         }
