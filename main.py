@@ -875,6 +875,46 @@ def weekly_data():
     date_range, breakfast, lunch, dinner = fetch_weekly_data()
     return render_template('weakly_menu.html', date_range=date_range, breakfast=breakfast, lunch=lunch, dinner=dinner)
 
+@app.route('/update_menu', methods=['POST'])
+@admin_required
+def update_menu():
+    try:
+        data = request.get_json()
+        meal_table = data.get('meal')  # 'breakfast', 'lunch', 'dinner'
+        row_id = data.get('id')
+        day_column = data.get('day')
+        new_value = data.get('new_value')
+
+        if not all([meal_table, row_id, day_column]):
+             return jsonify({'message': 'Missing data'}), 400
+
+        if meal_table not in ['breakfast', 'lunch', 'dinner']:
+            return jsonify({'message': 'Invalid meal type'}), 400
+        
+        # Allow case-insensitive column matching
+        allowed_columns = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'from_date', 'to_date']
+        column_map = {c.lower(): c for c in allowed_columns}
+        
+        if day_column.lower() not in column_map:
+             return jsonify({'message': f'Invalid column: {day_column}'}), 400
+             
+        actual_column = column_map[day_column.lower()]
+
+        conn = get_db_connection()
+        if not conn:
+             return jsonify({'message': 'DB connection failed'}), 500
+             
+        with conn.cursor() as cursor:
+            query = f"UPDATE {meal_table} SET `{actual_column}` = %s WHERE id = %s"
+            cursor.execute(query, (new_value, row_id))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'message': 'Menu updated successfully'}), 200
+    except Exception as e:
+        print(f"Error updating menu: {e}")
+        return jsonify({'message': f'Error updating menu: {str(e)}'}), 500
+
 # PDF Generation Class
 class CustomPDF(FPDF):
     def header(self):
@@ -911,7 +951,13 @@ def generate_pdf(from_date, meals):
         pdf.cell(column_widths[0], 10, meal_name, border=1, align="C")
 
         for day in column_headers[1:]:
-            pdf.cell(column_widths[column_headers.index(day)], 10, meal_data.get(day, ""), border=1, align="C")
+            # Handle case-insensitive keys in meal_data
+            value = ""
+            for k, v in meal_data.items():
+                if k.lower() == day.lower():
+                    value = v
+                    break
+            pdf.cell(column_widths[column_headers.index(day)], 10, str(value), border=1, align="C")
         pdf.ln()
 
     print("Meals Data Received in generate_pdf:", meals)  # Debugging print
@@ -940,30 +986,38 @@ def extract_meal_data(meal_data):
         print(f"Unexpected meal_data format: {meal_data[0]}")
         return {day: "" for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
 
-    return {day: meal_dict.get(day, "") for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
+    # Return raw dict, we handle case sensitivity in generate_pdf
+    return meal_dict
 
 # Route to Download Weekly Menu as PDF
 @app.route('/download_menu_pdf', methods=['GET'])
 def download_menu_pdf():
-    date_range, breakfast, lunch, dinner = fetch_weekly_data()
+    try:
+        date_range, breakfast, lunch, dinner = fetch_weekly_data()
 
-    if not date_range:
-        return jsonify({"error": "No data found for the current week"}), 404
+        if not date_range:
+            return jsonify({"error": "No data found for the current week"}), 404
 
-    # Ensure from_date is a string
-    from_date = str(date_range["FROM_DATE"])
-    to_date = str(date_range["TO_DATE"])
+        # Robust access to keys (case-insensitive)
+        keys = {k.upper(): v for k, v in date_range.items()}
+        from_date = str(keys.get("FROM_DATE", ""))
+        to_date = str(keys.get("TO_DATE", ""))
 
-    print(f"Generating PDF for: {from_date} - {to_date}")  # Debugging print
+        print(f"Generating PDF for: {from_date} - {to_date}")  # Debugging print
 
-    meals = {
-        "Breakfast": extract_meal_data(breakfast),
-        "Lunch": extract_meal_data(lunch),
-        "Dinner": extract_meal_data(dinner),
-    }
+        meals = {
+            "Breakfast": extract_meal_data(breakfast),
+            "Lunch": extract_meal_data(lunch),
+            "Dinner": extract_meal_data(dinner),
+        }
 
-    pdf_file = generate_pdf(from_date, meals)  # Ensure from_date is a string
-    return send_file(pdf_file, as_attachment=True)
+        pdf_file = generate_pdf(from_date, meals)
+        return send_file(pdf_file, as_attachment=True)
+    except Exception as e:
+        print(f"Error generating PDF: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
 

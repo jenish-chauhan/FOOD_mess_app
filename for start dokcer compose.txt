@@ -9,3 +9,13 @@ EOF
 
 //for the memory use 
 free -h
+
+//login to dokcer image 
+docker exec -it track_serve_db bash
+
+//access the databse 
+mysql -u trackserve -p track_serve
+
+//show the table 
+show tables;
+ SELECT * FROM grocery_vegetable_management;
