@@ -796,7 +796,10 @@ CREATE TABLE `admin` (
   `fullname` varchar(50) DEFAULT NULL,
   `phone_no` varchar(15) NOT NULL,
   `email_id` varchar(50) DEFAULT NULL,
-  `password` varchar(255) NOT NULL
+  `password` varchar(255) NOT NULL,
+  `session_token` varchar(128) DEFAULT NULL,
+  `session_token_created_at` datetime DEFAULT NULL,
+  KEY `idx_admin_session_token` (`session_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

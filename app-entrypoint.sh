@@ -25,6 +25,11 @@ print('Timed out waiting for DB', file=sys.stderr)
 sys.exit(1)
 PY
 
+
+# Run auto-migrations
+echo "Running database migrations..."
+python migrate.py
+
 echo "Starting application"
 # Use GUNICORN_WORKERS env var or default to 3
 GUNICORN_WORKERS=${GUNICORN_WORKERS:-3}
